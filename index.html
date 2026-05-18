@@ -157,6 +157,17 @@
                 <div class="form-group"><label>Lieu</label><input type="text" id="edit-location"></div>
                 <div class="form-group"><label>Titre</label><input type="text" id="edit-title" required></div>
                 <div class="form-group"><label>Histoire</label><textarea id="edit-story"></textarea></div>
+                
+                <div class="form-group">
+                    <label>Photos actuelles (clique sur × pour en enlever)</label>
+                    <div id="edit-photos-preview" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ajouter de nouvelles photos</label>
+                    <input type="file" id="edit-photos" accept="image/*" multiple>
+                </div>
+
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeEditModal()">Annuler</button>
                     <button type="submit" class="btn-submit">Mettre à jour</button>
@@ -179,7 +190,7 @@
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
-        // ⚠️ 1. TA CONFIGURATION FIREBASE ICI
+        // ⚠️ TA CONFIGURATION FIREBASE EXACTEMENT ICI
         const firebaseConfig = {
   apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
   authDomain: "notre-journal-93ae5.firebaseapp.com",
@@ -195,6 +206,7 @@
 
         // Mémoire globale des données
         window.memoriesData = {};
+        window.currentEditImages = []; // Tableau tampon pour gérer les photos en cours d'édition
 
         function escapeHTML(str) {
             if (!str) return '';
@@ -232,13 +244,13 @@
 
         document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
 
-        // AJOUTER UN SOUVENIR AVEC CLOUDINARY
+        // AJOUTER UN SOUVENIR
         document.getElementById('form-add').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.querySelector('#form-add .btn-submit');
             btn.disabled = true; btn.textContent = "Envoi en cours... ⏳";
 
-            // ⚠️ 2. TES IDENTIFIANTS CLOUDINARY ICI
+            // ⚠️ TES IDENTIFIANTS CLOUDINARY ICI
             const cloudinaryCloudName = "dac4juzg7"; 
             const cloudinaryPreset = "jy8vjemd";
 
@@ -250,24 +262,19 @@
                 const files = document.getElementById('input-photos').files;
 
                 const imageUrls = [];
-                
-                // Envoi des images vers Cloudinary
                 for (const file of files) {
                     const formData = new FormData();
                     formData.append("file", file);
                     formData.append("upload_preset", cloudinaryPreset);
 
                     const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, {
-                        method: "POST",
-                        body: formData
+                        method: "POST", body: formData
                     });
-                    
                     if(!res.ok) throw new Error("Erreur Cloudinary");
                     const data = await res.json();
                     imageUrls.push(data.secure_url);
                 }
 
-                // Envoi du texte et des liens images vers Firebase
                 await addDoc(collection(db, "memories"), {
                     date: date, location: location, title: title, story: story, images: imageUrls, timestamp: serverTimestamp()
                 });
@@ -276,32 +283,59 @@
                 closeAddModal();
                 loadMemories();
             } catch (error) {
-                console.error("Erreur d'upload:", error);
+                console.error(error);
                 alert("Erreur réseau lors de la mise en ligne des photos.");
             } finally {
                 btn.disabled = false; btn.textContent = "Sauvegarder";
             }
         });
 
-        // MODIFIER UN SOUVENIR
+        // ENREGISTRER LES MODIFICATIONS (TEXTE + NOUVELLES PHOTOS ET SUPPRESSIONS)
         document.getElementById('form-edit').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.querySelector('#form-edit .btn-submit');
-            btn.disabled = true; btn.textContent = "Mise à jour...";
+            btn.disabled = true; btn.textContent = "Mise à jour... ⏳";
+
+            // ⚠️ TES IDENTIFIANTS CLOUDINARY ICI
+            const cloudinaryCloudName = "dac4juzg7"; 
+            const cloudinaryPreset = "jy8vjemd";
 
             try {
                 const id = document.getElementById('edit-id').value;
+                
+                // On récupère la liste des images tampons validées (qui ont survécu aux suppressions de la modale)
+                let finalImages = [...window.currentEditImages];
+                
+                // On vérifie s'il y a de NOUVELLES images à uploader
+                const newFiles = document.getElementById('edit-photos').files;
+                for (const file of newFiles) {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("upload_preset", cloudinaryPreset);
+
+                    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, {
+                        method: "POST", body: formData
+                    });
+                    if(!res.ok) throw new Error("Erreur Cloudinary lors de la modification");
+                    const data = await res.json();
+                    finalImages.push(data.secure_url); // On fusionne la nouvelle URL dans le tableau final
+                }
+
+                // On écrase l'enregistrement Firestore avec le texte mis à jour ET la nouvelle liste d'images
                 await updateDoc(doc(db, "memories", id), {
                     date: document.getElementById('edit-date').value,
                     location: document.getElementById('edit-location').value,
                     title: document.getElementById('edit-title').value,
-                    story: document.getElementById('edit-story').value
+                    story: document.getElementById('edit-story').value,
+                    images: finalImages
                 });
+
+                document.getElementById('form-edit').reset();
                 closeEditModal();
                 loadMemories();
             } catch (error) {
                 console.error(error);
-                alert("Erreur lors de la modification.");
+                alert("Erreur lors de la modification du souvenir.");
             } finally {
                 btn.disabled = false; btn.textContent = "Mettre à jour";
             }
@@ -367,13 +401,13 @@
                 });
             } catch(err) {
                 console.error(err);
-                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--error-color);">Erreur lors de la lecture. Vérifiez les règles Firestore.</p>';
+                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--error-color);">Erreur lors de la lecture.</p>';
             }
         }
 
         // SUPPRIMER UN SOUVENIR
         window.deleteMemory = async (id) => {
-            if(!confirm("Supprimer définitivement ce souvenir ? (Les photos resteront sur le serveur Cloudinary)")) return;
+            if(!confirm("Supprimer définitivement ce souvenir ?")) return;
             try {
                 await deleteDoc(doc(db, "memories", id));
                 document.getElementById(`item-${id}`).remove();
@@ -387,6 +421,7 @@
         window.openAddModal = () => { document.getElementById('input-date').value = new Date().toISOString().split('T')[0]; document.getElementById('modal-add').classList.remove('hidden'); };
         window.closeAddModal = () => document.getElementById('modal-add').classList.add('hidden');
         
+        // INTERFACE : OUVERTURE DE LA MODALE MODIFICATION AVEC LES SOUVENIRS DEJA PRESENTS
         window.openEditModal = (id) => {
             const data = window.memoriesData[id];
             document.getElementById('edit-id').value = id;
@@ -394,9 +429,42 @@
             document.getElementById('edit-location').value = data.location || "";
             document.getElementById('edit-title').value = data.title;
             document.getElementById('edit-story').value = data.story || "";
+            
+            // On fait une copie locale des images associées à ce souvenir pour l'éditer en temps réel
+            window.currentEditImages = [...(data.images || [])];
+            window.renderEditPhotosPreview(); // Lancement du rendu des miniatures
+            
             document.getElementById('modal-edit').classList.remove('hidden');
         };
+        
         window.closeEditModal = () => document.getElementById('modal-edit').classList.add('hidden');
+
+        // RE-DESSINER L'ALBUM PHOTO TEMPORAIRE À L'INTÉRIEUR DE LA FENÊTRE DE MODIFICATION
+        window.renderEditPhotosPreview = () => {
+            const previewContainer = document.getElementById('edit-photos-preview');
+            previewContainer.innerHTML = ''; // On remet à zéro la zone
+            
+            if (window.currentEditImages.length === 0) {
+                previewContainer.innerHTML = '<p style="font-size:0.9rem; color:var(--text-light); margin:0; font-style:italic;">Aucune photo associée à ce souvenir.</p>';
+                return;
+            }
+
+            window.currentEditImages.forEach((imgUrl, index) => {
+                const div = document.createElement('div');
+                div.style.cssText = "position:relative; width:80px; height:80px; border-radius:6px; overflow:hidden; border:1px solid var(--line-color);";
+                div.innerHTML = `
+                    <img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover;">
+                    <button type="button" onclick="removeImageFromEdit(${index})" style="position:absolute; top:2px; right:2px; background:rgba(49,33,62,0.8); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; line-height:1; font-weight:bold;">&times;</button>
+                `;
+                previewContainer.appendChild(div);
+            });
+        };
+
+        // ENLEVER TEMPORAIREMENT UNE PHOTO DU SOUVENIR (AVANT VALIDATION)
+        window.removeImageFromEdit = (index) => {
+            window.currentEditImages.splice(index, 1); // Retire l'image choisie du tableau temporaire
+            window.renderEditPhotosPreview(); // Rafraîchit les miniatures
+        };
 
         // LIGHTBOX
         let currentPhotos = [];
