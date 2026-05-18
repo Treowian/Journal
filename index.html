@@ -25,7 +25,7 @@
         body { 
             font-family: system-ui, -apple-system, sans-serif; background: var(--bg-color); color: var(--text-color); 
             margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; overflow-x: hidden;
+            min-height: 100vh; overflow-x: hidden; scroll-behavior: smooth;
         }
         .hidden { display: none !important; }
 
@@ -44,12 +44,16 @@
         #app-screen { width: 100%; max-width: 900px; padding: 1rem; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;}
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--line-color);}
         .header-actions { display: flex; align-items: center; gap: 1rem; }
-        .live-indicator { font-size: 1.2rem; cursor: help; position: relative; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8;} 50% { transform: scale(1.1); opacity: 1;} 100% { transform: scale(1); opacity: 0.8;} }
+        
+        /* Indicateur de connexion temps réel */
+        .live-indicator { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-light); font-weight: bold; }
+        .live-dot { width: 8px; height: 8px; background-color: #2ecc71; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.7;} 50% { transform: scale(1.2); opacity: 1;} 100% { transform: scale(0.9); opacity: 0.7;} }
+
         .btn-small { background: transparent; border: 1px solid var(--text-light); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; transition: background 0.2s;}
         .btn-small:hover { background: rgba(0,0,0,0.05); }
 
-        /* 🆕 TABS & RECHERCHE */
+        /* TABS & RECHERCHE */
         .top-controls { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
         .view-tabs { display: flex; background: var(--line-color); border-radius: 20px; padding: 4px; }
         .view-tab { flex: 1; text-align: center; padding: 0.6rem; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 0.9rem; color: var(--text-light); transition: all 0.2s; }
@@ -59,13 +63,13 @@
         .search-box select { flex: 1; padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; outline: none; font-size: 0.9rem; background: white; cursor: pointer;}
         .search-box input:focus, .search-box select:focus { border-color: var(--accent-color); }
 
-        /* 🆕 EPHÉMÉRIDE (CE JOUR LÀ) */
-        .ephemeride-banner { background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 2rem; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); display: flex; align-items: center; gap: 1rem; box-sizing: border-box;}
+        /* EPHÉMÉRIDE (CE JOUR LÀ) */
+        .ephemeride-banner { background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 2rem; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); display: flex; align-items: center; gap: 1rem; box-sizing: border-box; cursor: pointer;}
         .ephemeride-icon { font-size: 2rem; }
         .ephemeride-content h3 { margin: 0 0 0.2rem 0; font-size: 1rem; opacity: 0.9;}
         .ephemeride-content p { margin: 0; font-weight: bold; font-size: 1.1rem; }
 
-        /* 🆕 CARTE DU MONDE */
+        /* CARTE DU MONDE */
         #map-container { width: 100%; height: 60vh; max-height: 600px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 1; border: 2px solid white;}
 
         /* FRISE CHRONOLOGIQUE */
@@ -74,8 +78,10 @@
         .timeline-item { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 3rem; z-index: 2; box-sizing: border-box;}
         .timeline-dot { width: 16px; height: 16px; background-color: var(--accent-color); border: 4px solid var(--bg-color); border-radius: 50%; margin-bottom: 1rem; z-index: 3; box-sizing: content-box; }
         .timeline-card { width: 90%; padding: 1.5rem; background-color: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); box-sizing: border-box; }
+        
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
         .card-meta { font-size: 0.85rem; color: var(--accent-color); font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
+        .card-author { font-size: 0.75rem; color: var(--text-light); text-transform: none; font-weight: normal; margin-left: 5px;}
         .card-actions { display: flex; gap: 0.5rem; }
         .btn-action { background: none; border: none; font-size: 1rem; cursor: pointer; opacity: 0.5; transition: opacity 0.2s; padding: 0; }
         .btn-action:hover { opacity: 1; }
@@ -114,6 +120,7 @@
         .modal-actions { display: flex; justify-content: flex-end; gap: 1.5rem; margin-top: 2rem; }
         .btn-cancel { background: transparent; border: none; color: var(--text-light); font-weight: bold; cursor: pointer; font-size: 1rem; }
         .btn-submit { background: var(--accent-color); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        
         .lightbox-content { position: relative; width: 95%; max-width: 800px; display: flex; align-items: center; justify-content: center; }
         .lightbox-img { max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); object-fit: contain; }
         .lightbox-nav { background: rgba(255,255,255,0.2); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; position: absolute; top: 50%; transform: translateY(-50%); transition: background 0.2s; z-index: 110; }
@@ -121,10 +128,17 @@
         .nav-prev { left: -60px; }
         .nav-next { right: -60px; }
         .close-lightbox { position: absolute; top: -40px; right: 0; color: white; font-size: 2.5rem; cursor: pointer; line-height: 1; }
+
+        /* NOTIFICATION TOAST (La Cloche) */
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--text-color); color: white; padding: 1rem 2rem; border-radius: 30px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; display: flex; align-items: center; gap: 10px;}
+        #toast.show { bottom: 30px; }
+
         @media screen and (max-width: 920px) { .nav-prev { left: 10px; } .nav-next { right: 10px; } .close-lightbox { right: 10px; } }
     </style>
 </head>
 <body>
+
+    <div id="toast">🔔 <span id="toast-msg">Nouveau souvenir ajouté !</span></div>
 
     <div id="login-screen" class="login-container">
         <h1 class="login-title">Notre Histoire</h1>
@@ -142,7 +156,7 @@
         <div class="header">
             <h2 style="margin:0; color: var(--accent-color);">Notre Journal</h2>
             <div class="header-actions">
-                <span class="live-indicator" title="Synchronisé en temps réel">🔔</span>
+                <div class="live-indicator"><div class="live-dot"></div> En direct</div>
                 <button id="btn-logout" class="btn-small">Se déconnecter</button>
             </div>
         </div>
@@ -180,7 +194,7 @@
             <h2 class="modal-title">Nouveau souvenir</h2>
             <form id="form-add">
                 <div class="form-group"><label>Date</label><input type="date" id="input-date" required></div>
-                <div class="form-group"><label>Lieu précis</label><input type="text" id="input-location" placeholder="Ex: Vieux-Port, Marseille"></div>
+                <div class="form-group"><label>Lieu précis</label><input type="text" id="input-location" placeholder="Ex: Marseille, France"></div>
                 <div class="form-group"><label>Titre</label><input type="text" id="input-title" required></div>
                 <div class="form-group"><label>Histoire</label><textarea id="input-story"></textarea></div>
                 <div class="form-group"><label>Photos</label><input type="file" id="input-photos" accept="image/*" multiple></div>
@@ -228,32 +242,48 @@
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
-        // ⚠️ 1. TA CONFIGURATION FIREBASE
+        // 🔑 CONFIGURATION FIREBASE
         const firebaseConfig = {
-  apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
-  authDomain: "notre-journal-93ae5.firebaseapp.com",
-  projectId: "notre-journal-93ae5",
-  storageBucket: "notre-journal-93ae5.firebasestorage.app",
-  messagingSenderId: "949489326058",
-  appId: "1:949489326058:web:3b77c41d414ff011e14493"
-};
+            apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
+            authDomain: "notre-journal-93ae5.firebaseapp.com",
+            projectId: "notre-journal-93ae5",
+            storageBucket: "notre-journal-93ae5.firebasestorage.app",
+            messagingSenderId: "949489326058",
+            appId: "1:949489326058:web:3b77c41d414ff011e14493"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         // Variables Globales
-        window.allMemories = []; // Stocke tout pour la recherche et la carte
+        window.allMemories = []; 
         window.currentEditImages = []; 
         let currentView = 'list';
         let mapInstance = null;
         let mapMarkers = [];
+        let isInitialLoad = true; // Empêche le Toast de s'activer au premier chargement
 
         // UTILITAIRES
         function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])); }
         function formatDate(dateString) { if(!dateString) return ''; return new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(); }
+        
+        // Création du pseudo à partir de l'email (ex: jean@mail.com -> Jean)
+        function getUserName() {
+            if(!auth.currentUser) return "Inconnu";
+            const name = auth.currentUser.email.split('@')[0];
+            return name.charAt(0).toUpperCase() + name.slice(1);
+        }
 
-        // 🆕 GEOCODING : Transforme "Marseille" en GPS {lat, lng} via OpenStreetMap (Gratuit)
+        // AFFICHER LE TOAST (Notification)
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // GEOCODING
         async function getCoordinates(city) {
             if(!city) return null;
             try {
@@ -292,7 +322,7 @@
             const btn = document.querySelector('#form-add .btn-submit');
             btn.disabled = true; btn.textContent = "Géolocalisation & Envoi... ⏳";
 
-            // ⚠️ 2. TES IDENTIFIANTS CLOUDINARY
+            // 🔑 IDENTIFIANTS CLOUDINARY
             const cloudinaryCloudName = "dac4juzg7"; 
             const cloudinaryPreset = "jy8vjemd";
 
@@ -303,7 +333,6 @@
                 const story = document.getElementById('input-story').value;
                 const files = document.getElementById('input-photos').files;
 
-                // Cherche les coordonnées GPS du lieu
                 const coords = await getCoordinates(location);
 
                 const imageUrls = [];
@@ -314,8 +343,8 @@
                 }
 
                 await addDoc(collection(db, "memories"), {
-                    date, location, title, story, images: imageUrls, 
-                    coords: coords, // Sauvegarde des coordonnées pour la carte
+                    date, location, title, story, images: imageUrls, coords, 
+                    author: getUserName(), // Enregistre le nom de l'auteur
                     timestamp: serverTimestamp()
                 });
 
@@ -330,7 +359,6 @@
             const btn = document.querySelector('#form-edit .btn-submit');
             btn.disabled = true; btn.textContent = "Mise à jour... ⏳";
 
-            // ⚠️ 3. TES IDENTIFIANTS CLOUDINARY
             const cloudinaryCloudName = "dac4juzg7"; 
             const cloudinaryPreset = "jy8vjemd";
 
@@ -338,7 +366,6 @@
                 const id = document.getElementById('edit-id').value;
                 const location = document.getElementById('edit-location').value;
                 
-                // Si le lieu a changé, on recalcule le GPS
                 const oldData = window.allMemories.find(m => m.id === id);
                 let coords = oldData.coords;
                 if (oldData.location !== location) coords = await getCoordinates(location);
@@ -363,18 +390,28 @@
             finally { btn.disabled = false; btn.textContent = "Mettre à jour"; }
         });
 
-        // SYNCHRONISATION EN TEMPS RÉEL (LE MOTEUR PRINCIPAL)
+        // SYNCHRONISATION EN TEMPS RÉEL ET GESTION DE LA CLOCHE
         window.unsubscribeSnapshot = null;
         function loadMemoriesLive() {
             const q = query(collection(db, "memories"), orderBy("date", "desc"));
             
             window.unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+                
+                // Vérifier s'il y a des ajouts/modifs d'une AUTRE personne pour afficher le Toast
+                if (!isInitialLoad) {
+                    snapshot.docChanges().forEach((change) => {
+                        const data = change.doc.data();
+                        const isMe = data.author === getUserName();
+                        if (change.type === "added" && !isMe) showToast(`${data.author || 'Quelqu\'un'} a ajouté un souvenir !`);
+                        if (change.type === "modified" && !isMe) showToast(`${data.author || 'Quelqu\'un'} a modifié un souvenir.`);
+                    });
+                }
+                
                 window.allMemories = [];
                 const yearSet = new Set();
 
                 snapshot.forEach(doc => {
-                    const data = doc.data();
-                    data.id = doc.id;
+                    const data = doc.data(); data.id = doc.id;
                     window.allMemories.push(data);
                     if(data.date) yearSet.add(data.date.split('-')[0]);
                 });
@@ -384,19 +421,19 @@
                 
                 if (currentView === 'list') renderMemories();
                 else if (currentView === 'map') renderMap();
+
+                isInitialLoad = false;
             });
         }
 
-        // 🆕 METTRE A JOUR LE MENU DÉROULANT DES ANNÉES
         function updateYearFilter(years) {
             const select = document.getElementById('filter-year');
             const currentVal = select.value;
             select.innerHTML = '<option value="all">Toutes les années</option>';
             Array.from(years).sort((a,b)=>b-a).forEach(y => { select.innerHTML += `<option value="${y}">${y}</option>`; });
-            select.value = currentVal; // Garde la sélection
+            select.value = currentVal;
         }
 
-        // 🆕 VÉRIFIER "CE JOUR LÀ"
         function checkOnThisDay() {
             const banner = document.getElementById('ephemeride-banner');
             const today = new Date();
@@ -404,7 +441,6 @@
             const tDay = String(today.getDate()).padStart(2, '0');
             const currentYear = today.getFullYear();
 
-            // Trouve le premier souvenir qui a le même mois et le même jour, mais une année passée
             const memory = window.allMemories.find(m => {
                 if(!m.date) return false;
                 const [y, mth, d] = m.date.split('-');
@@ -416,17 +452,13 @@
                 document.getElementById('eph-year').innerText = `Il y a ${yearsAgo} an${yearsAgo > 1 ? 's' : ''} aujourd'hui`;
                 document.getElementById('eph-title').innerText = memory.title;
                 banner.classList.remove('hidden');
-                // Scroll au souvenir si on clique
-                banner.onclick = () => {
-                    const el = document.getElementById(`item-${memory.id}`);
-                    if(el) el.scrollIntoView({behavior: "smooth", block: "center"});
-                };
+                banner.onclick = () => window.goToMemory(memory.id);
             } else {
                 banner.classList.add('hidden');
             }
         }
 
-        // RENDRE LA LISTE (AVEC FILTRES)
+        // RENDRE LA LISTE AVEC L'AUTEUR
         window.renderMemories = () => {
             const container = document.getElementById('timeline-container');
             container.innerHTML = ''; 
@@ -434,7 +466,6 @@
             const searchQuery = document.getElementById('search-input').value.toLowerCase();
             const yearQuery = document.getElementById('filter-year').value;
 
-            // Appliquer les filtres
             const filteredMemories = window.allMemories.filter(m => {
                 const matchSearch = (m.title||"").toLowerCase().includes(searchQuery) || (m.location||"").toLowerCase().includes(searchQuery) || (m.story||"").toLowerCase().includes(searchQuery);
                 const matchYear = yearQuery === 'all' || (m.date && m.date.startsWith(yearQuery));
@@ -451,6 +482,7 @@
                 const safeTitle = escapeHTML(data.title);
                 const safeStory = escapeHTML(data.story);
                 const displayDate = formatDate(data.date);
+                const authorDisplay = data.author ? `<span class="card-author">• Par ${data.author}</span>` : '';
 
                 let galleryHTML = '';
                 if (data.images && data.images.length > 0) {
@@ -470,7 +502,7 @@
                         <div class="timeline-dot"></div>
                         <div class="timeline-card">
                             <div class="card-header">
-                                <div class="card-meta">${safeLocation ? `📍 ${safeLocation} — ` : ''}${displayDate}</div>
+                                <div class="card-meta">${safeLocation ? `📍 ${safeLocation} — ` : ''}${displayDate} ${authorDisplay}</div>
                                 <div class="card-actions">
                                     <button class="btn-action" onclick="openEditModal('${data.id}')" title="Modifier">✏️</button>
                                     <button class="btn-action" onclick="deleteMemory('${data.id}')" title="Supprimer">🗑️</button>
@@ -485,43 +517,32 @@
             });
         };
 
-        // 🆕 GESTION DE LA CARTE LEAFLET
+        // GESTION DE LA CARTE LEAFLET
         window.renderMap = () => {
             if (!mapInstance) {
-                // Créer la carte centrée sur l'Europe par défaut
                 mapInstance = L.map('map-container').setView([46.2276, 2.2137], 5);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap'
-                }).addTo(mapInstance);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapInstance);
             }
             
-            // Nettoyer les anciens points
             mapMarkers.forEach(m => mapInstance.removeLayer(m));
             mapMarkers = [];
-
             const bounds = [];
 
             window.allMemories.forEach(m => {
                 if (m.coords && m.coords.lat && m.coords.lng) {
-                    const marker = L.circleMarker([m.coords.lat, m.coords.lng], {
-                        color: 'var(--accent-color)', fillColor: 'var(--accent-color)', fillOpacity: 0.8, radius: 8
-                    }).addTo(mapInstance);
+                    const marker = L.circleMarker([m.coords.lat, m.coords.lng], { color: 'var(--accent-color)', fillColor: 'var(--accent-color)', fillOpacity: 0.8, radius: 8 }).addTo(mapInstance);
                     
-                    // Bulle au clic
-                    marker.bindPopup(`<b>${escapeHTML(m.title)}</b><br>${formatDate(m.date)}`);
+                    // Bouton dans la popup pour aller voir le souvenir
+                    marker.bindPopup(`<b>${escapeHTML(m.title)}</b><br>${formatDate(m.date)}<br><button onclick="goToMemory('${m.id}')" style="margin-top:10px; padding:5px 10px; background:var(--accent-color); color:white; border:none; border-radius:4px; cursor:pointer;">Voir le souvenir</button>`);
                     mapMarkers.push(marker);
                     bounds.push([m.coords.lat, m.coords.lng]);
                 }
             });
 
-            // Recadrer la carte pour voir tous les points
-            setTimeout(() => { 
-                mapInstance.invalidateSize(); 
-                if(bounds.length > 0) mapInstance.fitBounds(bounds, {padding: [50, 50], maxZoom: 12});
-            }, 100);
+            setTimeout(() => { mapInstance.invalidateSize(); if(bounds.length > 0) mapInstance.fitBounds(bounds, {padding: [50, 50], maxZoom: 12}); }, 100);
         };
 
-        // 🆕 CHANGER DE VUE (LISTE VS CARTE)
+        // CHANGER DE VUE & REDIRECTION CARTE -> JOURNAL
         window.switchView = (view) => {
             currentView = view;
             document.getElementById('tab-list').classList.remove('active');
@@ -536,29 +557,49 @@
             } else {
                 document.getElementById('timeline-container').classList.add('hidden');
                 document.getElementById('search-box').classList.add('hidden');
-                document.getElementById('ephemeride-banner').classList.add('hidden'); // Cache la bannière
+                document.getElementById('ephemeride-banner').classList.add('hidden'); 
                 document.getElementById('map-container').classList.remove('hidden');
                 renderMap();
             }
         };
 
-        // SUPPRIMER
+        window.goToMemory = (id) => {
+            window.switchView('list');
+            setTimeout(() => {
+                const el = document.getElementById(`item-${id}`);
+                if(el) el.scrollIntoView({behavior: "smooth", block: "center"});
+            }, 100);
+        };
+
         window.deleteMemory = async (id) => {
             if(!confirm("Supprimer définitivement ce souvenir ?")) return;
             try { await deleteDoc(doc(db, "memories", id)); } catch (e) { alert("Erreur"); }
         };
 
-        // MODALES ET LIGHTBOX (INCHANGÉ)
-        window.openAddModal = () => { document.getElementById('input-date').value = new Date().toISOString().split('T')[0]; document.getElementById('modal-add').classList.remove('hidden'); };
+        // OUVRIR LES MODALES (AVEC LE BLOCAGE DES DATES FUTURES)
+        window.openAddModal = () => { 
+            const todayStr = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('input-date');
+            dateInput.value = todayStr;
+            dateInput.max = todayStr; // Bloque le futur
+            document.getElementById('modal-add').classList.remove('hidden'); 
+        };
         window.closeAddModal = () => document.getElementById('modal-add').classList.add('hidden');
+        
         window.openEditModal = (id) => {
             const data = window.allMemories.find(m => m.id === id);
-            document.getElementById('edit-id').value = id; document.getElementById('edit-date').value = data.date;
+            document.getElementById('edit-id').value = id; 
+            
+            const dateEditInput = document.getElementById('edit-date');
+            dateEditInput.value = data.date;
+            dateEditInput.max = new Date().toISOString().split('T')[0]; // Bloque le futur
+
             document.getElementById('edit-location').value = data.location || ""; document.getElementById('edit-title').value = data.title;
             document.getElementById('edit-story').value = data.story || "";
             window.currentEditImages = [...(data.images || [])]; window.renderEditPhotosPreview(); document.getElementById('modal-edit').classList.remove('hidden');
         };
         window.closeEditModal = () => document.getElementById('modal-edit').classList.add('hidden');
+
         window.renderEditPhotosPreview = () => {
             const pc = document.getElementById('edit-photos-preview'); pc.innerHTML = '';
             if (window.currentEditImages.length === 0) return pc.innerHTML = '<p style="font-size:0.9rem; color:var(--text-light); margin:0; font-style:italic;">Aucune photo.</p>';
