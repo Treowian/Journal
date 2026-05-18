@@ -43,9 +43,11 @@
         /* HEADER & BARRE D'OUTILS */
         #app-screen { width: 100%; max-width: 900px; padding: 1rem; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;}
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--line-color);}
-        .header-actions { display: flex; align-items: center; gap: 1rem; }
         
-        /* Indicateur de connexion temps réel */
+        .header-left { display: flex; flex-direction: column; gap: 0.2rem; }
+        .stats-counter { font-size: 0.75rem; color: var(--text-light); font-weight: bold; }
+        
+        .header-actions { display: flex; align-items: center; gap: 1rem; }
         .live-indicator { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-light); font-weight: bold; }
         .live-dot { width: 8px; height: 8px; background-color: #2ecc71; border-radius: 50%; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.7;} 50% { transform: scale(1.2); opacity: 1;} 100% { transform: scale(0.9); opacity: 0.7;} }
@@ -69,18 +71,31 @@
         .ephemeride-content h3 { margin: 0 0 0.2rem 0; font-size: 1rem; opacity: 0.9;}
         .ephemeride-content p { margin: 0; font-weight: bold; font-size: 1.1rem; }
 
-        /* CARTE DU MONDE */
+        /* VUES : CARTE & GALERIE */
         #map-container { width: 100%; height: 60vh; max-height: 600px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 1; border: 2px solid white;}
+        
+        .global-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; width: 100%; padding-bottom: 3rem;}
+        .gallery-item { position: relative; width: 100%; aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .gallery-item:hover img { transform: scale(1.05); }
+        .gallery-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(49, 33, 62, 0.9)); color: white; padding: 10px; opacity: 0; transition: opacity 0.3s; display: flex; flex-direction: column; justify-content: flex-end;}
+        .gallery-item:hover .gallery-overlay { opacity: 1; }
+        .gallery-overlay span { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; color: #e0dcd3;}
+        .gallery-overlay strong { font-size: 0.9rem; line-height: 1.2; }
+        @media screen and (max-width: 600px) { .global-gallery { grid-template-columns: repeat(2, 1fr); } .gallery-overlay { opacity: 1; background: linear-gradient(transparent, rgba(49, 33, 62, 0.7));} }
 
         /* FRISE CHRONOLOGIQUE */
         .timeline { position: relative; width: 100%; margin: 0 auto; padding: 0 0 2rem 0; box-sizing: border-box;}
         .timeline::after { content: ''; position: absolute; width: 2px; background-color: var(--line-color); top: 0; bottom: 0; left: 50%; transform: translateX(-50%); }
         .timeline-item { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 3rem; z-index: 2; box-sizing: border-box;}
         .timeline-dot { width: 16px; height: 16px; background-color: var(--accent-color); border: 4px solid var(--bg-color); border-radius: 50%; margin-bottom: 1rem; z-index: 3; box-sizing: content-box; }
-        .timeline-card { width: 90%; padding: 1.5rem; background-color: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); box-sizing: border-box; }
+        .timeline-card { width: 90%; padding: 1.5rem; background-color: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); box-sizing: border-box; border: 1px solid transparent; transition: border-color 0.3s;}
         
+        .badge-new { display: inline-block; background: #e74c3c; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; font-weight: bold; margin-left: 10px; animation: pop 0.5s ease-out; }
+        @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
-        .card-meta { font-size: 0.85rem; color: var(--accent-color); font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
+        .card-meta { font-size: 0.85rem; color: var(--accent-color); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center;}
         .card-author { font-size: 0.75rem; color: var(--text-light); text-transform: none; font-weight: normal; margin-left: 5px;}
         .card-actions { display: flex; gap: 0.5rem; }
         .btn-action { background: none; border: none; font-size: 1rem; cursor: pointer; opacity: 0.5; transition: opacity 0.2s; padding: 0; }
@@ -88,7 +103,7 @@
         .card-title { margin: 0 0 1rem 0; font-size: 1.3rem; }
         .card-text { margin: 0 0 1.5rem 0; line-height: 1.6; color: #4a5568; white-space: pre-wrap; }
 
-        /* GALERIE */
+        /* GALERIE DE LA CARTE */
         .card-gallery { position: relative; width: 100%; height: 250px; border-radius: 8px; overflow: hidden; background-color: #dfd5e8; cursor: pointer; transition: transform 0.2s ease; }
         .card-gallery:hover { transform: scale(0.99); }
         .card-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -129,7 +144,6 @@
         .nav-next { right: -60px; }
         .close-lightbox { position: absolute; top: -40px; right: 0; color: white; font-size: 2.5rem; cursor: pointer; line-height: 1; }
 
-        /* NOTIFICATION TOAST (La Cloche) */
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--text-color); color: white; padding: 1rem 2rem; border-radius: 30px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; display: flex; align-items: center; gap: 10px;}
         #toast.show { bottom: 30px; }
 
@@ -154,7 +168,10 @@
     <div id="app-screen" class="hidden">
         
         <div class="header">
-            <h2 style="margin:0; color: var(--accent-color);">Notre Journal</h2>
+            <div class="header-left">
+                <h2 style="margin:0; color: var(--accent-color);">Notre Journal</h2>
+                <span id="stats-counter" class="stats-counter">...</span>
+            </div>
             <div class="header-actions">
                 <div class="live-indicator"><div class="live-dot"></div> En direct</div>
                 <button id="btn-logout" class="btn-small">Se déconnecter</button>
@@ -164,6 +181,7 @@
         <div class="top-controls">
             <div class="view-tabs">
                 <div class="view-tab active" id="tab-list" onclick="switchView('list')">📖 Journal</div>
+                <div class="view-tab" id="tab-gallery" onclick="switchView('gallery')">🖼️ Galerie</div>
                 <div class="view-tab" id="tab-map" onclick="switchView('map')">🗺️ Carte</div>
             </div>
             
@@ -184,9 +202,21 @@
         </div>
 
         <div class="timeline" id="timeline-container"></div>
+        <div id="gallery-container" class="global-gallery hidden"></div>
         <div id="map-container" class="hidden"></div>
 
         <button class="fab" onclick="openAddModal()">+</button>
+    </div>
+
+    <div id="modal-name" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2 class="modal-title">Bienvenue !</h2>
+            <p style="color: var(--text-light); font-size: 0.9rem;">Comment voulez-vous qu'on vous appelle dans le journal ?</p>
+            <form id="form-name">
+                <div class="form-group"><input type="text" id="input-name" placeholder="Votre prénom ou surnom" required></div>
+                <div class="modal-actions"><button type="submit" class="btn-submit">Commencer</button></div>
+            </form>
+        </div>
     </div>
 
     <div id="modal-add" class="modal-overlay hidden">
@@ -262,20 +292,17 @@
         let currentView = 'list';
         let mapInstance = null;
         let mapMarkers = [];
-        let isInitialLoad = true; // Empêche le Toast de s'activer au premier chargement
+        let isInitialLoad = true;
+        
+        // 🕒 Gestion du "Catch-up" (Dernière visite)
+        const sessionLastSeen = parseInt(localStorage.getItem('mm_last_seen') || '0');
 
         // UTILITAIRES
         function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])); }
         function formatDate(dateString) { if(!dateString) return ''; return new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(); }
         
-        // Création du pseudo à partir de l'email (ex: jean@mail.com -> Jean)
-        function getUserName() {
-            if(!auth.currentUser) return "Inconnu";
-            const name = auth.currentUser.email.split('@')[0];
-            return name.charAt(0).toUpperCase() + name.slice(1);
-        }
+        function getSavedName() { return localStorage.getItem('mm_username') || "Moi"; }
 
-        // AFFICHER LE TOAST (Notification)
         function showToast(message) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = message;
@@ -283,7 +310,6 @@
             setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-        // GEOCODING
         async function getCoordinates(city) {
             if(!city) return null;
             try {
@@ -294,17 +320,30 @@
             return null;
         }
 
-        // AUTHENTIFICATION
+        // AUTHENTIFICATION & PRENOM
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
-                loadMemoriesLive();
+                
+                // Vérifier si le prénom est déjà enregistré
+                if (!localStorage.getItem('mm_username')) {
+                    document.getElementById('modal-name').classList.remove('hidden');
+                } else {
+                    loadMemoriesLive();
+                }
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('app-screen').classList.add('hidden');
                 if (window.unsubscribeSnapshot) window.unsubscribeSnapshot();
             }
+        });
+
+        document.getElementById('form-name').addEventListener('submit', (e) => {
+            e.preventDefault();
+            localStorage.setItem('mm_username', document.getElementById('input-name').value);
+            document.getElementById('modal-name').classList.add('hidden');
+            loadMemoriesLive();
         });
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -314,7 +353,14 @@
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
             catch (error) { document.getElementById('login-error').classList.remove('hidden'); btn.disabled = false; btn.textContent = "Entrer"; }
         });
-        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+        
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            localStorage.setItem('mm_last_seen', Date.now().toString()); // Sauvegarde avant départ
+            signOut(auth);
+        });
+        
+        // Sauvegarde de la dernière visite quand on ferme l'onglet
+        window.addEventListener('beforeunload', () => { localStorage.setItem('mm_last_seen', Date.now().toString()); });
 
         // AJOUTER UN SOUVENIR
         document.getElementById('form-add').addEventListener('submit', async (e) => {
@@ -344,7 +390,7 @@
 
                 await addDoc(collection(db, "memories"), {
                     date, location, title, story, images: imageUrls, coords, 
-                    author: getUserName(), // Enregistre le nom de l'auteur
+                    author: getSavedName(),
                     timestamp: serverTimestamp()
                 });
 
@@ -390,18 +436,17 @@
             finally { btn.disabled = false; btn.textContent = "Mettre à jour"; }
         });
 
-        // SYNCHRONISATION EN TEMPS RÉEL ET GESTION DE LA CLOCHE
+        // SYNCHRONISATION TEMPS RÉEL
         window.unsubscribeSnapshot = null;
         function loadMemoriesLive() {
             const q = query(collection(db, "memories"), orderBy("date", "desc"));
             
             window.unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
                 
-                // Vérifier s'il y a des ajouts/modifs d'une AUTRE personne pour afficher le Toast
                 if (!isInitialLoad) {
                     snapshot.docChanges().forEach((change) => {
                         const data = change.doc.data();
-                        const isMe = data.author === getUserName();
+                        const isMe = data.author === getSavedName();
                         if (change.type === "added" && !isMe) showToast(`${data.author || 'Quelqu\'un'} a ajouté un souvenir !`);
                         if (change.type === "modified" && !isMe) showToast(`${data.author || 'Quelqu\'un'} a modifié un souvenir.`);
                     });
@@ -409,20 +454,30 @@
                 
                 window.allMemories = [];
                 const yearSet = new Set();
+                let photoCount = 0;
+                let locationSet = new Set();
 
                 snapshot.forEach(doc => {
                     const data = doc.data(); data.id = doc.id;
                     window.allMemories.push(data);
                     if(data.date) yearSet.add(data.date.split('-')[0]);
+                    if(data.images) photoCount += data.images.length;
+                    if(data.location) locationSet.add(data.location);
                 });
+
+                // Update Stats
+                document.getElementById('stats-counter').innerText = `${window.allMemories.length} souvenirs • ${photoCount} photos • ${locationSet.size} lieux`;
 
                 updateYearFilter(yearSet);
                 checkOnThisDay();
                 
                 if (currentView === 'list') renderMemories();
                 else if (currentView === 'map') renderMap();
+                else if (currentView === 'gallery') renderGallery();
 
                 isInitialLoad = false;
+                // Met à jour la dernière vue à aujourd'hui après le premier chargement
+                localStorage.setItem('mm_last_seen', Date.now().toString());
             });
         }
 
@@ -458,7 +513,7 @@
             }
         }
 
-        // RENDRE LA LISTE AVEC L'AUTEUR
+        // RENDRE LA LISTE AVEC BADGE "NOUVEAU"
         window.renderMemories = () => {
             const container = document.getElementById('timeline-container');
             container.innerHTML = ''; 
@@ -483,6 +538,10 @@
                 const safeStory = escapeHTML(data.story);
                 const displayDate = formatDate(data.date);
                 const authorDisplay = data.author ? `<span class="card-author">• Par ${data.author}</span>` : '';
+                
+                // Détecter si le souvenir a été posté depuis la dernière visite de l'utilisateur (Catch-up)
+                const isNew = data.timestamp && data.timestamp.toMillis() > sessionLastSeen && data.author !== getSavedName();
+                const badgeNew = isNew ? `<span class="badge-new">Nouveau ✨</span>` : '';
 
                 let galleryHTML = '';
                 if (data.images && data.images.length > 0) {
@@ -500,9 +559,9 @@
                 container.insertAdjacentHTML('beforeend', `
                     <div class="timeline-item" id="item-${data.id}">
                         <div class="timeline-dot"></div>
-                        <div class="timeline-card">
+                        <div class="timeline-card" style="${isNew ? 'border-color: var(--accent-color);' : ''}">
                             <div class="card-header">
-                                <div class="card-meta">${safeLocation ? `📍 ${safeLocation} — ` : ''}${displayDate} ${authorDisplay}</div>
+                                <div class="card-meta">${safeLocation ? `📍 ${safeLocation} — ` : ''}${displayDate} ${authorDisplay} ${badgeNew}</div>
                                 <div class="card-actions">
                                     <button class="btn-action" onclick="openEditModal('${data.id}')" title="Modifier">✏️</button>
                                     <button class="btn-action" onclick="deleteMemory('${data.id}')" title="Supprimer">🗑️</button>
@@ -517,13 +576,50 @@
             });
         };
 
+        // 🆕 RENDRE LA GALERIE GLOBALE
+        window.renderGallery = () => {
+            const container = document.getElementById('gallery-container');
+            container.innerHTML = '';
+            
+            // On aplatit toutes les photos dans un seul tableau
+            let allPhotosFlat = [];
+            window.allMemories.forEach(m => {
+                if(m.images) {
+                    m.images.forEach(url => {
+                        allPhotosFlat.push({ url, title: m.title, date: m.date, id: m.id });
+                    });
+                }
+            });
+
+            if(allPhotosFlat.length === 0) {
+                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light); font-style:italic;">Aucune photo dans la galerie.</p>';
+                return;
+            }
+
+            // Pour ouvrir la lightbox depuis la galerie, on a besoin du tableau simple des URLs
+            const urlOnlyArray = allPhotosFlat.map(p => p.url);
+            const urlArrayString = JSON.stringify(urlOnlyArray).replace(/"/g, '&quot;');
+
+            allPhotosFlat.forEach((photo, index) => {
+                const dateShort = formatDate(photo.date);
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="gallery-item" onclick="openLightbox(${urlArrayString}, ${index})">
+                        <img src="${photo.url}" loading="lazy">
+                        <div class="gallery-overlay">
+                            <span>${dateShort}</span>
+                            <strong>${escapeHTML(photo.title)}</strong>
+                        </div>
+                    </div>
+                `);
+            });
+        };
+
         // GESTION DE LA CARTE LEAFLET
         window.renderMap = () => {
             if (!mapInstance) {
                 mapInstance = L.map('map-container').setView([46.2276, 2.2137], 5);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapInstance);
             }
-            
             mapMarkers.forEach(m => mapInstance.removeLayer(m));
             mapMarkers = [];
             const bounds = [];
@@ -531,8 +627,6 @@
             window.allMemories.forEach(m => {
                 if (m.coords && m.coords.lat && m.coords.lng) {
                     const marker = L.circleMarker([m.coords.lat, m.coords.lng], { color: 'var(--accent-color)', fillColor: 'var(--accent-color)', fillOpacity: 0.8, radius: 8 }).addTo(mapInstance);
-                    
-                    // Bouton dans la popup pour aller voir le souvenir
                     marker.bindPopup(`<b>${escapeHTML(m.title)}</b><br>${formatDate(m.date)}<br><button onclick="goToMemory('${m.id}')" style="margin-top:10px; padding:5px 10px; background:var(--accent-color); color:white; border:none; border-radius:4px; cursor:pointer;">Voir le souvenir</button>`);
                     mapMarkers.push(marker);
                     bounds.push([m.coords.lat, m.coords.lng]);
@@ -542,22 +636,30 @@
             setTimeout(() => { mapInstance.invalidateSize(); if(bounds.length > 0) mapInstance.fitBounds(bounds, {padding: [50, 50], maxZoom: 12}); }, 100);
         };
 
-        // CHANGER DE VUE & REDIRECTION CARTE -> JOURNAL
+        // CHANGER DE VUE
         window.switchView = (view) => {
             currentView = view;
             document.getElementById('tab-list').classList.remove('active');
+            document.getElementById('tab-gallery').classList.remove('active');
             document.getElementById('tab-map').classList.remove('active');
             document.getElementById(`tab-${view}`).classList.add('active');
+
+            // Cacher tous les blocs
+            document.getElementById('timeline-container').classList.add('hidden');
+            document.getElementById('gallery-container').classList.add('hidden');
+            document.getElementById('map-container').classList.add('hidden');
+            document.getElementById('search-box').classList.add('hidden');
+            document.getElementById('ephemeride-banner').classList.add('hidden'); 
 
             if (view === 'list') {
                 document.getElementById('timeline-container').classList.remove('hidden');
                 document.getElementById('search-box').classList.remove('hidden');
-                document.getElementById('map-container').classList.add('hidden');
+                checkOnThisDay(); // Réafficher la bannière si besoin
                 renderMemories();
-            } else {
-                document.getElementById('timeline-container').classList.add('hidden');
-                document.getElementById('search-box').classList.add('hidden');
-                document.getElementById('ephemeride-banner').classList.add('hidden'); 
+            } else if (view === 'gallery') {
+                document.getElementById('gallery-container').classList.remove('hidden');
+                renderGallery();
+            } else if (view === 'map') {
                 document.getElementById('map-container').classList.remove('hidden');
                 renderMap();
             }
@@ -576,7 +678,7 @@
             try { await deleteDoc(doc(db, "memories", id)); } catch (e) { alert("Erreur"); }
         };
 
-        // OUVRIR LES MODALES (AVEC LE BLOCAGE DES DATES FUTURES)
+        // OUVRIR LES MODALES
         window.openAddModal = () => { 
             const todayStr = new Date().toISOString().split('T')[0];
             const dateInput = document.getElementById('input-date');
@@ -589,11 +691,9 @@
         window.openEditModal = (id) => {
             const data = window.allMemories.find(m => m.id === id);
             document.getElementById('edit-id').value = id; 
-            
             const dateEditInput = document.getElementById('edit-date');
             dateEditInput.value = data.date;
-            dateEditInput.max = new Date().toISOString().split('T')[0]; // Bloque le futur
-
+            dateEditInput.max = new Date().toISOString().split('T')[0]; 
             document.getElementById('edit-location').value = data.location || ""; document.getElementById('edit-title').value = data.title;
             document.getElementById('edit-story').value = data.story || "";
             window.currentEditImages = [...(data.images || [])]; window.renderEditPhotosPreview(); document.getElementById('modal-edit').classList.remove('hidden');
@@ -610,7 +710,7 @@
         window.removeImageFromEdit = (i) => { window.currentEditImages.splice(i, 1); window.renderEditPhotosPreview(); };
 
         let currentPhotos = [], currentIndex = 0;
-        window.openLightbox = (arr, i) => { currentPhotos = arr; currentIndex = i; document.getElementById('lightbox-img').src = arr[i]; document.getElementById('modal-lightbox').classList.remove('hidden'); };
+        window.openLightbox = (arr, i) => { currentPhotos = arr; currentIndex = i; document.getElementById('lightbox-img').src = currentPhotos[currentIndex]; document.getElementById('modal-lightbox').classList.remove('hidden'); };
         window.closeLightbox = () => document.getElementById('modal-lightbox').classList.add('hidden');
         window.prevPhoto = () => { if(currentPhotos.length <= 1) return; currentIndex = (currentIndex === 0) ? currentPhotos.length - 1 : currentIndex - 1; document.getElementById('lightbox-img').src = currentPhotos[currentIndex]; };
         window.nextPhoto = () => { if(currentPhotos.length <= 1) return; currentIndex = (currentIndex === currentPhotos.length - 1) ? 0 : currentIndex + 1; document.getElementById('lightbox-img').src = currentPhotos[currentIndex]; };
