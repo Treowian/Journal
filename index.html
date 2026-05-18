@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Notre Histoire</title>
     
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         /* ==========================================================================
-           🎨 SYSTEME DE DESIGN & VARIABLES (THEME VIOLET AMETHYSTE)
+           🎨 SYSTEME DE DESIGN & VARIABLES
            ========================================================================== */
         :root {
             --bg-color: #faf8fc;
@@ -20,12 +23,10 @@
         }
 
         body { 
-            font-family: system-ui, -apple-system, sans-serif; 
-            background: var(--bg-color); color: var(--text-color); 
+            font-family: system-ui, -apple-system, sans-serif; background: var(--bg-color); color: var(--text-color); 
             margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center;
             min-height: 100vh; overflow-x: hidden;
         }
-
         .hidden { display: none !important; }
 
         /* CONNEXION */
@@ -39,51 +40,53 @@
         .btn-primary:hover:not(:disabled) { opacity: 0.9; }
         .error-msg { color: var(--error-color); font-size: 0.9rem; text-align: center; margin-top: 0.5rem; }
 
-        /* HEADER & NOTIFICATION */
-        #app-screen { width: 100%; max-width: 900px; padding: 1rem; box-sizing: border-box; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--line-color);}
-        
+        /* HEADER & BARRE D'OUTILS */
+        #app-screen { width: 100%; max-width: 900px; padding: 1rem; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;}
+        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--line-color);}
         .header-actions { display: flex; align-items: center; gap: 1rem; }
         .live-indicator { font-size: 1.2rem; cursor: help; position: relative; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 0.8;} 50% { transform: scale(1.1); opacity: 1;} 100% { transform: scale(1); opacity: 0.8;} }
-
         .btn-small { background: transparent; border: 1px solid var(--text-light); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; transition: background 0.2s;}
         .btn-small:hover { background: rgba(0,0,0,0.05); }
 
+        /* 🆕 TABS & RECHERCHE */
+        .top-controls { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+        .view-tabs { display: flex; background: var(--line-color); border-radius: 20px; padding: 4px; }
+        .view-tab { flex: 1; text-align: center; padding: 0.6rem; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 0.9rem; color: var(--text-light); transition: all 0.2s; }
+        .view-tab.active { background: var(--card-bg); color: var(--accent-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .search-box { display: flex; gap: 0.5rem; width: 100%; }
+        .search-box input { flex: 2; padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; outline: none; font-size: 0.9rem;}
+        .search-box select { flex: 1; padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; outline: none; font-size: 0.9rem; background: white; cursor: pointer;}
+        .search-box input:focus, .search-box select:focus { border-color: var(--accent-color); }
+
+        /* 🆕 EPHÉMÉRIDE (CE JOUR LÀ) */
+        .ephemeride-banner { background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 2rem; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); display: flex; align-items: center; gap: 1rem; box-sizing: border-box;}
+        .ephemeride-icon { font-size: 2rem; }
+        .ephemeride-content h3 { margin: 0 0 0.2rem 0; font-size: 1rem; opacity: 0.9;}
+        .ephemeride-content p { margin: 0; font-weight: bold; font-size: 1.1rem; }
+
+        /* 🆕 CARTE DU MONDE */
+        #map-container { width: 100%; height: 60vh; max-height: 600px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 1; border: 2px solid white;}
+
         /* FRISE CHRONOLOGIQUE */
-        .timeline { position: relative; width: 100%; margin: 0 auto; padding: 2rem 0; box-sizing: border-box;}
+        .timeline { position: relative; width: 100%; margin: 0 auto; padding: 0 0 2rem 0; box-sizing: border-box;}
         .timeline::after { content: ''; position: absolute; width: 2px; background-color: var(--line-color); top: 0; bottom: 0; left: 50%; transform: translateX(-50%); }
         .timeline-item { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 3rem; z-index: 2; box-sizing: border-box;}
         .timeline-dot { width: 16px; height: 16px; background-color: var(--accent-color); border: 4px solid var(--bg-color); border-radius: 50%; margin-bottom: 1rem; z-index: 3; box-sizing: content-box; }
         .timeline-card { width: 90%; padding: 1.5rem; background-color: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); box-sizing: border-box; }
-
-        /* EN-TÊTE DE LA CARTE AVEC BOUTONS */
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
         .card-meta { font-size: 0.85rem; color: var(--accent-color); font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
         .card-actions { display: flex; gap: 0.5rem; }
         .btn-action { background: none; border: none; font-size: 1rem; cursor: pointer; opacity: 0.5; transition: opacity 0.2s; padding: 0; }
         .btn-action:hover { opacity: 1; }
-
         .card-title { margin: 0 0 1rem 0; font-size: 1.3rem; }
         .card-text { margin: 0 0 1.5rem 0; line-height: 1.6; color: #4a5568; white-space: pre-wrap; }
 
-        /* GALERIE & BADGE DISCRET */
+        /* GALERIE */
         .card-gallery { position: relative; width: 100%; height: 250px; border-radius: 8px; overflow: hidden; background-color: #dfd5e8; cursor: pointer; transition: transform 0.2s ease; }
         .card-gallery:hover { transform: scale(0.99); }
         .card-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        
-        /* 🔄 CORRECTION : Le badge élégant en bas à gauche */
-        .card-gallery.has-more::after { 
-            content: "+" attr(data-more) " photos"; 
-            position: absolute; 
-            bottom: 12px; left: 12px; /* Placé en bas à gauche */
-            background: rgba(49, 33, 62, 0.8); /* Fond sombre transparent */
-            color: white; font-size: 0.8rem; font-weight: bold; 
-            padding: 6px 14px; border-radius: 20px; /* Forme de pilule */
-            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            display: flex; align-items: center; justify-content: center; 
-        }
+        .card-gallery.has-more::after { content: "+" attr(data-more) " photos"; position: absolute; bottom: 12px; left: 12px; background: rgba(49, 33, 62, 0.8); color: white; font-size: 0.8rem; font-weight: bold; padding: 6px 14px; border-radius: 20px; backdrop-filter: blur(4px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
 
         /* PC RESPONSIVE */
         @media screen and (min-width: 768px) {
@@ -97,12 +100,10 @@
             .timeline-item:nth-child(even)::after { left: 0; transform: translate(-50%, -50%); }
         }
 
-        /* FAB */
+        /* FAB & MODALES */
         .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-color); color: white; border: none; font-size: 2.3rem; font-weight: 300; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4); cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
         .fab:hover { transform: scale(1.1); }
-
-        /* MODALES */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(49, 33, 62, 0.8); z-index: 100; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(49, 33, 62, 0.8); z-index: 100; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .modal-box { background: var(--card-bg); width: 95%; max-width: 500px; padding: 2rem; border-radius: 12px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-title { margin-top: 0; color: var(--accent-color); }
         .form-group { margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; }
@@ -113,8 +114,6 @@
         .modal-actions { display: flex; justify-content: flex-end; gap: 1.5rem; margin-top: 2rem; }
         .btn-cancel { background: transparent; border: none; color: var(--text-light); font-weight: bold; cursor: pointer; font-size: 1rem; }
         .btn-submit { background: var(--accent-color); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
-
-        /* LIGHTBOX */
         .lightbox-content { position: relative; width: 95%; max-width: 800px; display: flex; align-items: center; justify-content: center; }
         .lightbox-img { max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); object-fit: contain; }
         .lightbox-nav { background: rgba(255,255,255,0.2); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; position: absolute; top: 50%; transform: translateY(-50%); transition: background 0.2s; z-index: 110; }
@@ -122,7 +121,6 @@
         .nav-prev { left: -60px; }
         .nav-next { right: -60px; }
         .close-lightbox { position: absolute; top: -40px; right: 0; color: white; font-size: 2.5rem; cursor: pointer; line-height: 1; }
-
         @media screen and (max-width: 920px) { .nav-prev { left: 10px; } .nav-next { right: 10px; } .close-lightbox { right: 10px; } }
     </style>
 </head>
@@ -140,6 +138,7 @@
     </div>
 
     <div id="app-screen" class="hidden">
+        
         <div class="header">
             <h2 style="margin:0; color: var(--accent-color);">Notre Journal</h2>
             <div class="header-actions">
@@ -147,7 +146,32 @@
                 <button id="btn-logout" class="btn-small">Se déconnecter</button>
             </div>
         </div>
+
+        <div class="top-controls">
+            <div class="view-tabs">
+                <div class="view-tab active" id="tab-list" onclick="switchView('list')">📖 Journal</div>
+                <div class="view-tab" id="tab-map" onclick="switchView('map')">🗺️ Carte</div>
+            </div>
+            
+            <div class="search-box" id="search-box">
+                <input type="text" id="search-input" placeholder="Rechercher un mot, un lieu..." oninput="renderMemories()">
+                <select id="filter-year" onchange="renderMemories()">
+                    <option value="all">Toutes les années</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="ephemeride-banner" class="ephemeride-banner hidden">
+            <div class="ephemeride-icon">✨</div>
+            <div class="ephemeride-content">
+                <h3 id="eph-year">Il y a X ans</h3>
+                <p id="eph-title">Titre du souvenir</p>
+            </div>
+        </div>
+
         <div class="timeline" id="timeline-container"></div>
+        <div id="map-container" class="hidden"></div>
+
         <button class="fab" onclick="openAddModal()">+</button>
     </div>
 
@@ -156,7 +180,7 @@
             <h2 class="modal-title">Nouveau souvenir</h2>
             <form id="form-add">
                 <div class="form-group"><label>Date</label><input type="date" id="input-date" required></div>
-                <div class="form-group"><label>Lieu</label><input type="text" id="input-location" placeholder="Ex: Marseille, France"></div>
+                <div class="form-group"><label>Lieu précis</label><input type="text" id="input-location" placeholder="Ex: Vieux-Port, Marseille"></div>
                 <div class="form-group"><label>Titre</label><input type="text" id="input-title" required></div>
                 <div class="form-group"><label>Histoire</label><textarea id="input-story"></textarea></div>
                 <div class="form-group"><label>Photos</label><input type="file" id="input-photos" accept="image/*" multiple></div>
@@ -177,17 +201,11 @@
                 <div class="form-group"><label>Lieu</label><input type="text" id="edit-location"></div>
                 <div class="form-group"><label>Titre</label><input type="text" id="edit-title" required></div>
                 <div class="form-group"><label>Histoire</label><textarea id="edit-story"></textarea></div>
-                
                 <div class="form-group">
                     <label>Photos actuelles (clique sur × pour enlever)</label>
                     <div id="edit-photos-preview" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;"></div>
                 </div>
-                
-                <div class="form-group">
-                    <label>Ajouter de nouvelles photos</label>
-                    <input type="file" id="edit-photos" accept="image/*" multiple>
-                </div>
-
+                <div class="form-group"><label>Ajouter de nouvelles photos</label><input type="file" id="edit-photos" accept="image/*" multiple></div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeEditModal()">Annuler</button>
                     <button type="submit" class="btn-submit">Mettre à jour</button>
@@ -208,33 +226,42 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        // 🔄 NOUVEAU : Remplacement de getDocs par onSnapshot pour le Temps Réel !
         import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
+        // ⚠️ 1. TA CONFIGURATION FIREBASE
         const firebaseConfig = {
-            apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
-            authDomain: "notre-journal-93ae5.firebaseapp.com",
-            projectId: "notre-journal-93ae5",
-            storageBucket: "notre-journal-93ae5.firebasestorage.app",
-            messagingSenderId: "949489326058",
-            appId: "1:949489326058:web:3b77c41d414ff011e14493"
-        };
+  apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
+  authDomain: "notre-journal-93ae5.firebaseapp.com",
+  projectId: "notre-journal-93ae5",
+  storageBucket: "notre-journal-93ae5.firebasestorage.app",
+  messagingSenderId: "949489326058",
+  appId: "1:949489326058:web:3b77c41d414ff011e14493"
+};
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.memoriesData = {};
+        // Variables Globales
+        window.allMemories = []; // Stocke tout pour la recherche et la carte
         window.currentEditImages = []; 
+        let currentView = 'list';
+        let mapInstance = null;
+        let mapMarkers = [];
 
-        function escapeHTML(str) {
-            if (!str) return '';
-            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
-        }
+        // UTILITAIRES
+        function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])); }
+        function formatDate(dateString) { if(!dateString) return ''; return new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(); }
 
-        function formatDate(dateString) {
-            if(!dateString) return '';
-            return new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+        // 🆕 GEOCODING : Transforme "Marseille" en GPS {lat, lng} via OpenStreetMap (Gratuit)
+        async function getCoordinates(city) {
+            if(!city) return null;
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`);
+                const data = await res.json();
+                if(data && data.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+            } catch(e) { console.error("Erreur GPS:", e); }
+            return null;
         }
 
         // AUTHENTIFICATION
@@ -242,11 +269,11 @@
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
-                loadMemoriesLive(); // Lance l'écoute en temps réel
+                loadMemoriesLive();
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('app-screen').classList.add('hidden');
-                if (window.unsubscribeSnapshot) window.unsubscribeSnapshot(); // Coupe l'écoute à la déconnexion
+                if (window.unsubscribeSnapshot) window.unsubscribeSnapshot();
             }
         });
 
@@ -254,22 +281,18 @@
             e.preventDefault();
             const btn = document.getElementById('btn-login');
             btn.disabled = true; btn.textContent = "Vérification...";
-            try {
-                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
-            } catch (error) {
-                document.getElementById('login-error').classList.remove('hidden');
-                btn.disabled = false; btn.textContent = "Entrer";
-            }
+            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
+            catch (error) { document.getElementById('login-error').classList.remove('hidden'); btn.disabled = false; btn.textContent = "Entrer"; }
         });
-
         document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
 
         // AJOUTER UN SOUVENIR
         document.getElementById('form-add').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.querySelector('#form-add .btn-submit');
-            btn.disabled = true; btn.textContent = "Envoi en cours... ⏳";
+            btn.disabled = true; btn.textContent = "Géolocalisation & Envoi... ⏳";
 
+            // ⚠️ 2. TES IDENTIFIANTS CLOUDINARY
             const cloudinaryCloudName = "dac4juzg7"; 
             const cloudinaryPreset = "jy8vjemd";
 
@@ -280,209 +303,273 @@
                 const story = document.getElementById('input-story').value;
                 const files = document.getElementById('input-photos').files;
 
+                // Cherche les coordonnées GPS du lieu
+                const coords = await getCoordinates(location);
+
                 const imageUrls = [];
                 for (const file of files) {
-                    const formData = new FormData();
-                    formData.append("file", file);
-                    formData.append("upload_preset", cloudinaryPreset);
-
-                    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, {
-                        method: "POST", body: formData
-                    });
-                    if(!res.ok) throw new Error("Erreur Cloudinary");
-                    const data = await res.json();
-                    imageUrls.push(data.secure_url);
+                    const formData = new FormData(); formData.append("file", file); formData.append("upload_preset", cloudinaryPreset);
+                    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, { method: "POST", body: formData });
+                    const data = await res.json(); imageUrls.push(data.secure_url);
                 }
 
                 await addDoc(collection(db, "memories"), {
-                    date: date, location: location, title: title, story: story, images: imageUrls, timestamp: serverTimestamp()
+                    date, location, title, story, images: imageUrls, 
+                    coords: coords, // Sauvegarde des coordonnées pour la carte
+                    timestamp: serverTimestamp()
                 });
 
-                document.getElementById('form-add').reset();
-                closeAddModal();
-                // PLUS BESOIN d'appeler loadMemories() manuellement, Firebase le fera tout seul grâce au Temps Réel !
-            } catch (error) {
-                console.error(error);
-                alert("Erreur réseau lors de la mise en ligne des photos.");
-            } finally {
-                btn.disabled = false; btn.textContent = "Sauvegarder";
-            }
+                document.getElementById('form-add').reset(); closeAddModal();
+            } catch (error) { alert("Erreur réseau."); } 
+            finally { btn.disabled = false; btn.textContent = "Sauvegarder"; }
         });
 
-        // ENREGISTRER LES MODIFICATIONS
+        // MODIFIER UN SOUVENIR
         document.getElementById('form-edit').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.querySelector('#form-edit .btn-submit');
             btn.disabled = true; btn.textContent = "Mise à jour... ⏳";
 
+            // ⚠️ 3. TES IDENTIFIANTS CLOUDINARY
             const cloudinaryCloudName = "dac4juzg7"; 
             const cloudinaryPreset = "jy8vjemd";
 
             try {
                 const id = document.getElementById('edit-id').value;
+                const location = document.getElementById('edit-location').value;
+                
+                // Si le lieu a changé, on recalcule le GPS
+                const oldData = window.allMemories.find(m => m.id === id);
+                let coords = oldData.coords;
+                if (oldData.location !== location) coords = await getCoordinates(location);
+
                 let finalImages = [...window.currentEditImages];
                 const newFiles = document.getElementById('edit-photos').files;
                 
                 for (const file of newFiles) {
-                    const formData = new FormData();
-                    formData.append("file", file);
-                    formData.append("upload_preset", cloudinaryPreset);
-
-                    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, {
-                        method: "POST", body: formData
-                    });
-                    if(!res.ok) throw new Error("Erreur Cloudinary");
-                    const data = await res.json();
-                    finalImages.push(data.secure_url); 
+                    const formData = new FormData(); formData.append("file", file); formData.append("upload_preset", cloudinaryPreset);
+                    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, { method: "POST", body: formData });
+                    const data = await res.json(); finalImages.push(data.secure_url); 
                 }
 
                 await updateDoc(doc(db, "memories", id), {
                     date: document.getElementById('edit-date').value,
-                    location: document.getElementById('edit-location').value,
-                    title: document.getElementById('edit-title').value,
-                    story: document.getElementById('edit-story').value,
-                    images: finalImages
+                    location, coords, title: document.getElementById('edit-title').value,
+                    story: document.getElementById('edit-story').value, images: finalImages
                 });
 
-                document.getElementById('form-edit').reset();
-                closeEditModal();
-                // PLUS BESOIN de recharger manuellement !
-            } catch (error) {
-                console.error(error);
-                alert("Erreur lors de la modification du souvenir.");
-            } finally {
-                btn.disabled = false; btn.textContent = "Mettre à jour";
-            }
+                document.getElementById('form-edit').reset(); closeEditModal();
+            } catch (error) { alert("Erreur lors de la modification."); } 
+            finally { btn.disabled = false; btn.textContent = "Mettre à jour"; }
         });
 
-        // 🔄 NOUVEAU : CHARGER LES SOUVENIRS EN TEMPS RÉEL
+        // SYNCHRONISATION EN TEMPS RÉEL (LE MOTEUR PRINCIPAL)
         window.unsubscribeSnapshot = null;
-
         function loadMemoriesLive() {
-            const container = document.getElementById('timeline-container');
-            container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light);">Chargement de vos mémoires...</p>';
-
             const q = query(collection(db, "memories"), orderBy("date", "desc"));
             
-            // Écoute permanente : si la base change, cette fonction se déclenche automatiquement
             window.unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
-                container.innerHTML = ''; 
-                window.memoriesData = {};
+                window.allMemories = [];
+                const yearSet = new Set();
 
-                if (snapshot.empty) {
-                    container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light); font-style:italic;">Votre journal est vierge. Cliquez sur +</p>';
-                    return;
-                }
-
-                snapshot.forEach(firestoreDoc => {
-                    const id = firestoreDoc.id;
-                    const data = firestoreDoc.data();
-                    window.memoriesData[id] = data; 
-
-                    const safeLocation = escapeHTML(data.location);
-                    const safeTitle = escapeHTML(data.title);
-                    const safeStory = escapeHTML(data.story);
-                    const displayDate = formatDate(data.date);
-
-                    let galleryHTML = '';
-                    if (data.images && data.images.length > 0) {
-                        const firstImage = data.images[0];
-                        const imagesArrayString = JSON.stringify(data.images).replace(/"/g, '&quot;');
-                        
-                        if (data.images.length === 1) {
-                            galleryHTML = `<div class="card-gallery" onclick="openLightbox(${imagesArrayString}, 0)"><img src="${firstImage}" loading="lazy"></div>`;
-                        } else {
-                            const extraCount = data.images.length - 1;
-                            galleryHTML = `<div class="card-gallery has-more" data-more="${extraCount}" onclick="openLightbox(${imagesArrayString}, 0)"><img src="${firstImage}" loading="lazy"></div>`;
-                        }
-                    }
-
-                    const cardHTML = `
-                        <div class="timeline-item" id="item-${id}">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-card">
-                                <div class="card-header">
-                                    <div class="card-meta">${safeLocation ? `📍 ${safeLocation} — ` : ''}${displayDate}</div>
-                                    <div class="card-actions">
-                                        <button class="btn-action" onclick="openEditModal('${id}')" title="Modifier">✏️</button>
-                                        <button class="btn-action" onclick="deleteMemory('${id}')" title="Supprimer">🗑️</button>
-                                    </div>
-                                </div>
-                                <h3 class="card-title">${safeTitle}</h3>
-                                <p class="card-text">${safeStory}</p>
-                                ${galleryHTML}
-                            </div>
-                        </div>
-                    `;
-                    container.insertAdjacentHTML('beforeend', cardHTML);
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    data.id = doc.id;
+                    window.allMemories.push(data);
+                    if(data.date) yearSet.add(data.date.split('-')[0]);
                 });
-            }, (error) => {
-                console.error("Erreur Live Sync: ", error);
-                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--error-color);">Erreur de synchronisation.</p>';
+
+                updateYearFilter(yearSet);
+                checkOnThisDay();
+                
+                if (currentView === 'list') renderMemories();
+                else if (currentView === 'map') renderMap();
             });
         }
 
-        // SUPPRIMER UN SOUVENIR
-        window.deleteMemory = async (id) => {
-            if(!confirm("Supprimer définitivement ce souvenir ?")) return;
-            try {
-                await deleteDoc(doc(db, "memories", id));
-                // Pas besoin de supprimer manuellement du HTML, la synchro temps réel le fera !
-            } catch (error) {
-                console.error(error);
-                alert("Erreur lors de la suppression.");
+        // 🆕 METTRE A JOUR LE MENU DÉROULANT DES ANNÉES
+        function updateYearFilter(years) {
+            const select = document.getElementById('filter-year');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="all">Toutes les années</option>';
+            Array.from(years).sort((a,b)=>b-a).forEach(y => { select.innerHTML += `<option value="${y}">${y}</option>`; });
+            select.value = currentVal; // Garde la sélection
+        }
+
+        // 🆕 VÉRIFIER "CE JOUR LÀ"
+        function checkOnThisDay() {
+            const banner = document.getElementById('ephemeride-banner');
+            const today = new Date();
+            const tMonth = String(today.getMonth() + 1).padStart(2, '0');
+            const tDay = String(today.getDate()).padStart(2, '0');
+            const currentYear = today.getFullYear();
+
+            // Trouve le premier souvenir qui a le même mois et le même jour, mais une année passée
+            const memory = window.allMemories.find(m => {
+                if(!m.date) return false;
+                const [y, mth, d] = m.date.split('-');
+                return mth === tMonth && d === tDay && parseInt(y) < currentYear;
+            });
+
+            if (memory) {
+                const yearsAgo = currentYear - parseInt(memory.date.split('-')[0]);
+                document.getElementById('eph-year').innerText = `Il y a ${yearsAgo} an${yearsAgo > 1 ? 's' : ''} aujourd'hui`;
+                document.getElementById('eph-title').innerText = memory.title;
+                banner.classList.remove('hidden');
+                // Scroll au souvenir si on clique
+                banner.onclick = () => {
+                    const el = document.getElementById(`item-${memory.id}`);
+                    if(el) el.scrollIntoView({behavior: "smooth", block: "center"});
+                };
+            } else {
+                banner.classList.add('hidden');
             }
-        };
+        }
 
-        // FONCTIONS GLOBALES (MODALES)
-        window.openAddModal = () => { document.getElementById('input-date').value = new Date().toISOString().split('T')[0]; document.getElementById('modal-add').classList.remove('hidden'); };
-        window.closeAddModal = () => document.getElementById('modal-add').classList.add('hidden');
-        
-        window.openEditModal = (id) => {
-            const data = window.memoriesData[id];
-            document.getElementById('edit-id').value = id;
-            document.getElementById('edit-date').value = data.date;
-            document.getElementById('edit-location').value = data.location || "";
-            document.getElementById('edit-title').value = data.title;
-            document.getElementById('edit-story').value = data.story || "";
-            
-            window.currentEditImages = [...(data.images || [])];
-            window.renderEditPhotosPreview();
-            
-            document.getElementById('modal-edit').classList.remove('hidden');
-        };
-        
-        window.closeEditModal = () => document.getElementById('modal-edit').classList.add('hidden');
+        // RENDRE LA LISTE (AVEC FILTRES)
+        window.renderMemories = () => {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = ''; 
 
-        window.renderEditPhotosPreview = () => {
-            const previewContainer = document.getElementById('edit-photos-preview');
-            previewContainer.innerHTML = '';
-            
-            if (window.currentEditImages.length === 0) {
-                previewContainer.innerHTML = '<p style="font-size:0.9rem; color:var(--text-light); margin:0; font-style:italic;">Aucune photo associée à ce souvenir.</p>';
+            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+            const yearQuery = document.getElementById('filter-year').value;
+
+            // Appliquer les filtres
+            const filteredMemories = window.allMemories.filter(m => {
+                const matchSearch = (m.title||"").toLowerCase().includes(searchQuery) || (m.location||"").toLowerCase().includes(searchQuery) || (m.story||"").toLowerCase().includes(searchQuery);
+                const matchYear = yearQuery === 'all' || (m.date && m.date.startsWith(yearQuery));
+                return matchSearch && matchYear;
+            });
+
+            if (filteredMemories.length === 0) {
+                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light); font-style:italic;">Aucun souvenir trouvé.</p>';
                 return;
             }
 
-            window.currentEditImages.forEach((imgUrl, index) => {
-                const div = document.createElement('div');
-                div.style.cssText = "position:relative; width:80px; height:80px; border-radius:6px; overflow:hidden; border:1px solid var(--line-color);";
-                div.innerHTML = `
-                    <img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover;">
-                    <button type="button" onclick="removeImageFromEdit(${index})" style="position:absolute; top:2px; right:2px; background:rgba(49,33,62,0.8); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; line-height:1; font-weight:bold;">&times;</button>
-                `;
-                previewContainer.appendChild(div);
+            filteredMemories.forEach(data => {
+                const safeLocation = escapeHTML(data.location);
+                const safeTitle = escapeHTML(data.title);
+                const safeStory = escapeHTML(data.story);
+                const displayDate = formatDate(data.date);
+
+                let galleryHTML = '';
+                if (data.images && data.images.length > 0) {
+                    const firstImage = data.images[0];
+                    const imagesArrayString = JSON.stringify(data.images).replace(/"/g, '&quot;');
+                    
+                    if (data.images.length === 1) {
+                        galleryHTML = `<div class="card-gallery" onclick="openLightbox(${imagesArrayString}, 0)"><img src="${firstImage}" loading="lazy"></div>`;
+                    } else {
+                        const extraCount = data.images.length - 1;
+                        galleryHTML = `<div class="card-gallery has-more" data-more="${extraCount}" onclick="openLightbox(${imagesArrayString}, 0)"><img src="${firstImage}" loading="lazy"></div>`;
+                    }
+                }
+
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="timeline-item" id="item-${data.id}">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-card">
+                            <div class="card-header">
+                                <div class="card-meta">${safeLocation ? `📍 ${safeLocation} — ` : ''}${displayDate}</div>
+                                <div class="card-actions">
+                                    <button class="btn-action" onclick="openEditModal('${data.id}')" title="Modifier">✏️</button>
+                                    <button class="btn-action" onclick="deleteMemory('${data.id}')" title="Supprimer">🗑️</button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">${safeTitle}</h3>
+                            <p class="card-text">${safeStory}</p>
+                            ${galleryHTML}
+                        </div>
+                    </div>
+                `);
             });
         };
 
-        window.removeImageFromEdit = (index) => {
-            window.currentEditImages.splice(index, 1);
-            window.renderEditPhotosPreview(); 
+        // 🆕 GESTION DE LA CARTE LEAFLET
+        window.renderMap = () => {
+            if (!mapInstance) {
+                // Créer la carte centrée sur l'Europe par défaut
+                mapInstance = L.map('map-container').setView([46.2276, 2.2137], 5);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(mapInstance);
+            }
+            
+            // Nettoyer les anciens points
+            mapMarkers.forEach(m => mapInstance.removeLayer(m));
+            mapMarkers = [];
+
+            const bounds = [];
+
+            window.allMemories.forEach(m => {
+                if (m.coords && m.coords.lat && m.coords.lng) {
+                    const marker = L.circleMarker([m.coords.lat, m.coords.lng], {
+                        color: 'var(--accent-color)', fillColor: 'var(--accent-color)', fillOpacity: 0.8, radius: 8
+                    }).addTo(mapInstance);
+                    
+                    // Bulle au clic
+                    marker.bindPopup(`<b>${escapeHTML(m.title)}</b><br>${formatDate(m.date)}`);
+                    mapMarkers.push(marker);
+                    bounds.push([m.coords.lat, m.coords.lng]);
+                }
+            });
+
+            // Recadrer la carte pour voir tous les points
+            setTimeout(() => { 
+                mapInstance.invalidateSize(); 
+                if(bounds.length > 0) mapInstance.fitBounds(bounds, {padding: [50, 50], maxZoom: 12});
+            }, 100);
         };
 
-        // LIGHTBOX
-        let currentPhotos = [];
-        let currentIndex = 0;
-        window.openLightbox = (photosArray, index) => { currentPhotos = photosArray; currentIndex = index; document.getElementById('lightbox-img').src = currentPhotos[currentIndex]; document.getElementById('modal-lightbox').classList.remove('hidden'); };
+        // 🆕 CHANGER DE VUE (LISTE VS CARTE)
+        window.switchView = (view) => {
+            currentView = view;
+            document.getElementById('tab-list').classList.remove('active');
+            document.getElementById('tab-map').classList.remove('active');
+            document.getElementById(`tab-${view}`).classList.add('active');
+
+            if (view === 'list') {
+                document.getElementById('timeline-container').classList.remove('hidden');
+                document.getElementById('search-box').classList.remove('hidden');
+                document.getElementById('map-container').classList.add('hidden');
+                renderMemories();
+            } else {
+                document.getElementById('timeline-container').classList.add('hidden');
+                document.getElementById('search-box').classList.add('hidden');
+                document.getElementById('ephemeride-banner').classList.add('hidden'); // Cache la bannière
+                document.getElementById('map-container').classList.remove('hidden');
+                renderMap();
+            }
+        };
+
+        // SUPPRIMER
+        window.deleteMemory = async (id) => {
+            if(!confirm("Supprimer définitivement ce souvenir ?")) return;
+            try { await deleteDoc(doc(db, "memories", id)); } catch (e) { alert("Erreur"); }
+        };
+
+        // MODALES ET LIGHTBOX (INCHANGÉ)
+        window.openAddModal = () => { document.getElementById('input-date').value = new Date().toISOString().split('T')[0]; document.getElementById('modal-add').classList.remove('hidden'); };
+        window.closeAddModal = () => document.getElementById('modal-add').classList.add('hidden');
+        window.openEditModal = (id) => {
+            const data = window.allMemories.find(m => m.id === id);
+            document.getElementById('edit-id').value = id; document.getElementById('edit-date').value = data.date;
+            document.getElementById('edit-location').value = data.location || ""; document.getElementById('edit-title').value = data.title;
+            document.getElementById('edit-story').value = data.story || "";
+            window.currentEditImages = [...(data.images || [])]; window.renderEditPhotosPreview(); document.getElementById('modal-edit').classList.remove('hidden');
+        };
+        window.closeEditModal = () => document.getElementById('modal-edit').classList.add('hidden');
+        window.renderEditPhotosPreview = () => {
+            const pc = document.getElementById('edit-photos-preview'); pc.innerHTML = '';
+            if (window.currentEditImages.length === 0) return pc.innerHTML = '<p style="font-size:0.9rem; color:var(--text-light); margin:0; font-style:italic;">Aucune photo.</p>';
+            window.currentEditImages.forEach((url, i) => {
+                pc.insertAdjacentHTML('beforeend', `<div style="position:relative; width:80px; height:80px; border-radius:6px; overflow:hidden; border:1px solid var(--line-color);"><img src="${url}" style="width:100%; height:100%; object-fit:cover;"><button type="button" onclick="removeImageFromEdit(${i})" style="position:absolute; top:2px; right:2px; background:rgba(49,33,62,0.8); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer;">&times;</button></div>`);
+            });
+        };
+        window.removeImageFromEdit = (i) => { window.currentEditImages.splice(i, 1); window.renderEditPhotosPreview(); };
+
+        let currentPhotos = [], currentIndex = 0;
+        window.openLightbox = (arr, i) => { currentPhotos = arr; currentIndex = i; document.getElementById('lightbox-img').src = arr[i]; document.getElementById('modal-lightbox').classList.remove('hidden'); };
         window.closeLightbox = () => document.getElementById('modal-lightbox').classList.add('hidden');
         window.prevPhoto = () => { if(currentPhotos.length <= 1) return; currentIndex = (currentIndex === 0) ? currentPhotos.length - 1 : currentIndex - 1; document.getElementById('lightbox-img').src = currentPhotos[currentIndex]; };
         window.nextPhoto = () => { if(currentPhotos.length <= 1) return; currentIndex = (currentIndex === currentPhotos.length - 1) ? 0 : currentIndex + 1; document.getElementById('lightbox-img').src = currentPhotos[currentIndex]; };
