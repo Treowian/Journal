@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Notre Histoire</title>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+
+        // 2. Colle ta configuration Firebase ici (celle de l'Étape 3)
+        const firebaseConfig = {
+  apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
+  authDomain: "notre-journal-93ae5.firebaseapp.com",
+  projectId: "notre-journal-93ae5",
+  storageBucket: "notre-journal-93ae5.firebasestorage.app",
+  messagingSenderId: "949489326058",
+  appId: "1:949489326058:web:3b77c41d414ff011e14493"
+};
+
+        // 3. Initialisation
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // On rend les outils disponibles globalement pour pouvoir coder facilement ensuite
+        window.auth = auth;
+        window.db = db;
+        window.storage = storage;
+
+        console.log("🔥 Firebase est connecté !");
+    </script>
+
+    <style>
+        /* CSS de base pour tester */
+        body { font-family: system-ui, sans-serif; background: #fdfbf7; color: #333; margin: 0; padding: 2rem; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h1>Connexion</h1>
+        <p>Notre espace privé.</p>
+        </div>
+
+    <div id="app-screen" class="hidden">
+        <h1>Notre Journal</h1>
+        <button id="btn-logout">Se déconnecter</button>
+        </div>
+
+</body>
+</html>
