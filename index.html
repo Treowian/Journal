@@ -39,9 +39,14 @@
         .btn-primary:hover:not(:disabled) { opacity: 0.9; }
         .error-msg { color: var(--error-color); font-size: 0.9rem; text-align: center; margin-top: 0.5rem; }
 
-        /* HEADER */
+        /* HEADER & NOTIFICATION */
         #app-screen { width: 100%; max-width: 900px; padding: 1rem; box-sizing: border-box; }
         .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--line-color);}
+        
+        .header-actions { display: flex; align-items: center; gap: 1rem; }
+        .live-indicator { font-size: 1.2rem; cursor: help; position: relative; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8;} 50% { transform: scale(1.1); opacity: 1;} 100% { transform: scale(1); opacity: 0.8;} }
+
         .btn-small { background: transparent; border: 1px solid var(--text-light); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; transition: background 0.2s;}
         .btn-small:hover { background: rgba(0,0,0,0.05); }
 
@@ -62,11 +67,23 @@
         .card-title { margin: 0 0 1rem 0; font-size: 1.3rem; }
         .card-text { margin: 0 0 1.5rem 0; line-height: 1.6; color: #4a5568; white-space: pre-wrap; }
 
-        /* GALERIE */
+        /* GALERIE & BADGE DISCRET */
         .card-gallery { position: relative; width: 100%; height: 250px; border-radius: 8px; overflow: hidden; background-color: #dfd5e8; cursor: pointer; transition: transform 0.2s ease; }
         .card-gallery:hover { transform: scale(0.99); }
         .card-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .card-gallery.has-more::after { content: attr(data-more); position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(49, 33, 62, 0.6); color: white; font-size: 3rem; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        
+        /* 🔄 CORRECTION : Le badge élégant en bas à gauche */
+        .card-gallery.has-more::after { 
+            content: "+" attr(data-more) " photos"; 
+            position: absolute; 
+            bottom: 12px; left: 12px; /* Placé en bas à gauche */
+            background: rgba(49, 33, 62, 0.8); /* Fond sombre transparent */
+            color: white; font-size: 0.8rem; font-weight: bold; 
+            padding: 6px 14px; border-radius: 20px; /* Forme de pilule */
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center; 
+        }
 
         /* PC RESPONSIVE */
         @media screen and (min-width: 768px) {
@@ -125,7 +142,10 @@
     <div id="app-screen" class="hidden">
         <div class="header">
             <h2 style="margin:0; color: var(--accent-color);">Notre Journal</h2>
-            <button id="btn-logout" class="btn-small">Se déconnecter</button>
+            <div class="header-actions">
+                <span class="live-indicator" title="Synchronisé en temps réel">🔔</span>
+                <button id="btn-logout" class="btn-small">Se déconnecter</button>
+            </div>
         </div>
         <div class="timeline" id="timeline-container"></div>
         <button class="fab" onclick="openAddModal()">+</button>
@@ -159,7 +179,7 @@
                 <div class="form-group"><label>Histoire</label><textarea id="edit-story"></textarea></div>
                 
                 <div class="form-group">
-                    <label>Photos actuelles (clique sur × pour en enlever)</label>
+                    <label>Photos actuelles (clique sur × pour enlever)</label>
                     <div id="edit-photos-preview" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;"></div>
                 </div>
                 
@@ -188,25 +208,24 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        // 🔄 NOUVEAU : Remplacement de getDocs par onSnapshot pour le Temps Réel !
+        import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
-        // ⚠️ TA CONFIGURATION FIREBASE EXACTEMENT ICI
         const firebaseConfig = {
-  apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
-  authDomain: "notre-journal-93ae5.firebaseapp.com",
-  projectId: "notre-journal-93ae5",
-  storageBucket: "notre-journal-93ae5.firebasestorage.app",
-  messagingSenderId: "949489326058",
-  appId: "1:949489326058:web:3b77c41d414ff011e14493"
-};
+            apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
+            authDomain: "notre-journal-93ae5.firebaseapp.com",
+            projectId: "notre-journal-93ae5",
+            storageBucket: "notre-journal-93ae5.firebasestorage.app",
+            messagingSenderId: "949489326058",
+            appId: "1:949489326058:web:3b77c41d414ff011e14493"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Mémoire globale des données
         window.memoriesData = {};
-        window.currentEditImages = []; // Tableau tampon pour gérer les photos en cours d'édition
+        window.currentEditImages = []; 
 
         function escapeHTML(str) {
             if (!str) return '';
@@ -223,10 +242,11 @@
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
-                loadMemories();
+                loadMemoriesLive(); // Lance l'écoute en temps réel
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('app-screen').classList.add('hidden');
+                if (window.unsubscribeSnapshot) window.unsubscribeSnapshot(); // Coupe l'écoute à la déconnexion
             }
         });
 
@@ -250,7 +270,6 @@
             const btn = document.querySelector('#form-add .btn-submit');
             btn.disabled = true; btn.textContent = "Envoi en cours... ⏳";
 
-            // ⚠️ TES IDENTIFIANTS CLOUDINARY ICI
             const cloudinaryCloudName = "dac4juzg7"; 
             const cloudinaryPreset = "jy8vjemd";
 
@@ -281,7 +300,7 @@
 
                 document.getElementById('form-add').reset();
                 closeAddModal();
-                loadMemories();
+                // PLUS BESOIN d'appeler loadMemories() manuellement, Firebase le fera tout seul grâce au Temps Réel !
             } catch (error) {
                 console.error(error);
                 alert("Erreur réseau lors de la mise en ligne des photos.");
@@ -290,24 +309,20 @@
             }
         });
 
-        // ENREGISTRER LES MODIFICATIONS (TEXTE + NOUVELLES PHOTOS ET SUPPRESSIONS)
+        // ENREGISTRER LES MODIFICATIONS
         document.getElementById('form-edit').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.querySelector('#form-edit .btn-submit');
             btn.disabled = true; btn.textContent = "Mise à jour... ⏳";
 
-            // ⚠️ TES IDENTIFIANTS CLOUDINARY ICI
             const cloudinaryCloudName = "dac4juzg7"; 
             const cloudinaryPreset = "jy8vjemd";
 
             try {
                 const id = document.getElementById('edit-id').value;
-                
-                // On récupère la liste des images tampons validées (qui ont survécu aux suppressions de la modale)
                 let finalImages = [...window.currentEditImages];
-                
-                // On vérifie s'il y a de NOUVELLES images à uploader
                 const newFiles = document.getElementById('edit-photos').files;
+                
                 for (const file of newFiles) {
                     const formData = new FormData();
                     formData.append("file", file);
@@ -316,12 +331,11 @@
                     const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, {
                         method: "POST", body: formData
                     });
-                    if(!res.ok) throw new Error("Erreur Cloudinary lors de la modification");
+                    if(!res.ok) throw new Error("Erreur Cloudinary");
                     const data = await res.json();
-                    finalImages.push(data.secure_url); // On fusionne la nouvelle URL dans le tableau final
+                    finalImages.push(data.secure_url); 
                 }
 
-                // On écrase l'enregistrement Firestore avec le texte mis à jour ET la nouvelle liste d'images
                 await updateDoc(doc(db, "memories", id), {
                     date: document.getElementById('edit-date').value,
                     location: document.getElementById('edit-location').value,
@@ -332,7 +346,7 @@
 
                 document.getElementById('form-edit').reset();
                 closeEditModal();
-                loadMemories();
+                // PLUS BESOIN de recharger manuellement !
             } catch (error) {
                 console.error(error);
                 alert("Erreur lors de la modification du souvenir.");
@@ -341,14 +355,17 @@
             }
         });
 
-        // CHARGER LES SOUVENIRS
-        async function loadMemories() {
+        // 🔄 NOUVEAU : CHARGER LES SOUVENIRS EN TEMPS RÉEL
+        window.unsubscribeSnapshot = null;
+
+        function loadMemoriesLive() {
             const container = document.getElementById('timeline-container');
             container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light);">Chargement de vos mémoires...</p>';
 
-            try {
-                const q = query(collection(db, "memories"), orderBy("date", "desc"));
-                const snapshot = await getDocs(q);
+            const q = query(collection(db, "memories"), orderBy("date", "desc"));
+            
+            // Écoute permanente : si la base change, cette fonction se déclenche automatiquement
+            window.unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
                 container.innerHTML = ''; 
                 window.memoriesData = {};
 
@@ -376,7 +393,7 @@
                             galleryHTML = `<div class="card-gallery" onclick="openLightbox(${imagesArrayString}, 0)"><img src="${firstImage}" loading="lazy"></div>`;
                         } else {
                             const extraCount = data.images.length - 1;
-                            galleryHTML = `<div class="card-gallery has-more" data-more="+${extraCount}" onclick="openLightbox(${imagesArrayString}, 0)"><img src="${firstImage}" loading="lazy"></div>`;
+                            galleryHTML = `<div class="card-gallery has-more" data-more="${extraCount}" onclick="openLightbox(${imagesArrayString}, 0)"><img src="${firstImage}" loading="lazy"></div>`;
                         }
                     }
 
@@ -399,10 +416,10 @@
                     `;
                     container.insertAdjacentHTML('beforeend', cardHTML);
                 });
-            } catch(err) {
-                console.error(err);
-                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--error-color);">Erreur lors de la lecture.</p>';
-            }
+            }, (error) => {
+                console.error("Erreur Live Sync: ", error);
+                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--error-color);">Erreur de synchronisation.</p>';
+            });
         }
 
         // SUPPRIMER UN SOUVENIR
@@ -410,7 +427,7 @@
             if(!confirm("Supprimer définitivement ce souvenir ?")) return;
             try {
                 await deleteDoc(doc(db, "memories", id));
-                document.getElementById(`item-${id}`).remove();
+                // Pas besoin de supprimer manuellement du HTML, la synchro temps réel le fera !
             } catch (error) {
                 console.error(error);
                 alert("Erreur lors de la suppression.");
@@ -421,7 +438,6 @@
         window.openAddModal = () => { document.getElementById('input-date').value = new Date().toISOString().split('T')[0]; document.getElementById('modal-add').classList.remove('hidden'); };
         window.closeAddModal = () => document.getElementById('modal-add').classList.add('hidden');
         
-        // INTERFACE : OUVERTURE DE LA MODALE MODIFICATION AVEC LES SOUVENIRS DEJA PRESENTS
         window.openEditModal = (id) => {
             const data = window.memoriesData[id];
             document.getElementById('edit-id').value = id;
@@ -430,19 +446,17 @@
             document.getElementById('edit-title').value = data.title;
             document.getElementById('edit-story').value = data.story || "";
             
-            // On fait une copie locale des images associées à ce souvenir pour l'éditer en temps réel
             window.currentEditImages = [...(data.images || [])];
-            window.renderEditPhotosPreview(); // Lancement du rendu des miniatures
+            window.renderEditPhotosPreview();
             
             document.getElementById('modal-edit').classList.remove('hidden');
         };
         
         window.closeEditModal = () => document.getElementById('modal-edit').classList.add('hidden');
 
-        // RE-DESSINER L'ALBUM PHOTO TEMPORAIRE À L'INTÉRIEUR DE LA FENÊTRE DE MODIFICATION
         window.renderEditPhotosPreview = () => {
             const previewContainer = document.getElementById('edit-photos-preview');
-            previewContainer.innerHTML = ''; // On remet à zéro la zone
+            previewContainer.innerHTML = '';
             
             if (window.currentEditImages.length === 0) {
                 previewContainer.innerHTML = '<p style="font-size:0.9rem; color:var(--text-light); margin:0; font-style:italic;">Aucune photo associée à ce souvenir.</p>';
@@ -460,10 +474,9 @@
             });
         };
 
-        // ENLEVER TEMPORAIREMENT UNE PHOTO DU SOUVENIR (AVANT VALIDATION)
         window.removeImageFromEdit = (index) => {
-            window.currentEditImages.splice(index, 1); // Retire l'image choisie du tableau temporaire
-            window.renderEditPhotosPreview(); // Rafraîchit les miniatures
+            window.currentEditImages.splice(index, 1);
+            window.renderEditPhotosPreview(); 
         };
 
         // LIGHTBOX
