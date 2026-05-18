@@ -40,30 +40,34 @@
         .btn-primary:hover:not(:disabled) { opacity: 0.9; }
         .error-msg { color: var(--error-color); font-size: 0.9rem; text-align: center; margin-top: 0.5rem; }
 
-        /* HEADER & BARRE D'OUTILS */
+        /* HEADER ÉPURÉ */
         #app-screen { width: 100%; max-width: 900px; padding: 1rem; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;}
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--line-color);}
         
         .header-left { display: flex; flex-direction: column; gap: 0.2rem; }
         .stats-counter { font-size: 0.75rem; color: var(--text-light); font-weight: bold; }
         
-        .header-actions { display: flex; align-items: center; gap: 1rem; }
-        .live-indicator { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-light); font-weight: bold; }
-        .live-dot { width: 8px; height: 8px; background-color: #2ecc71; border-radius: 50%; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.7;} 50% { transform: scale(1.2); opacity: 1;} 100% { transform: scale(0.9); opacity: 0.7;} }
-
-        .btn-small { background: transparent; border: 1px solid var(--text-light); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; transition: background 0.2s;}
-        .btn-small:hover { background: rgba(0,0,0,0.05); }
+        .btn-logout { background: none; border: none; color: var(--text-light); cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s; }
+        .btn-logout:hover { background: rgba(0,0,0,0.05); color: var(--error-color); }
 
         /* TABS & RECHERCHE */
         .top-controls { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
         .view-tabs { display: flex; background: var(--line-color); border-radius: 20px; padding: 4px; }
         .view-tab { flex: 1; text-align: center; padding: 0.6rem; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 0.9rem; color: var(--text-light); transition: all 0.2s; }
         .view-tab.active { background: var(--card-bg); color: var(--accent-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .search-box { display: flex; gap: 0.5rem; width: 100%; }
+        .search-box { display: flex; gap: 0.5rem; width: 100%; position: relative; }
         .search-box input { flex: 2; padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; outline: none; font-size: 0.9rem;}
-        .search-box select { flex: 1; padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; outline: none; font-size: 0.9rem; background: white; cursor: pointer;}
-        .search-box input:focus, .search-box select:focus { border-color: var(--accent-color); }
+        .search-box input:focus { border-color: var(--accent-color); }
+
+        /* CUSTOM DROPDOWN (Filtre sans interface native OS) */
+        .custom-select { position: relative; flex: 1; user-select: none; }
+        .select-selected { padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); }
+        .select-selected.active { border-color: var(--accent-color); }
+        .select-items { position: absolute; background-color: white; top: 100%; left: 0; right: 0; z-index: 99; border: 1px solid var(--line-color); border-radius: 8px; margin-top: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-height: 250px; overflow-y: auto; display: none; }
+        .select-items.select-show { display: block; }
+        .select-item { padding: 0.8rem; cursor: pointer; font-size: 0.9rem; border-bottom: 1px solid var(--line-color); color: var(--text-color); }
+        .select-item:last-child { border-bottom: none; }
+        .select-item:hover { background-color: var(--bg-color); color: var(--accent-color); font-weight: bold; }
 
         /* EPHÉMÉRIDE (CE JOUR LÀ) */
         .ephemeride-banner { background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 2rem; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); display: flex; align-items: center; gap: 1rem; box-sizing: border-box; cursor: pointer;}
@@ -84,9 +88,7 @@
         .gallery-overlay strong { font-size: 0.9rem; line-height: 1.2; }
         @media screen and (max-width: 600px) { .global-gallery { grid-template-columns: repeat(2, 1fr); } .gallery-overlay { opacity: 1; background: linear-gradient(transparent, rgba(49, 33, 62, 0.7));} }
 
-        /* ==========================================================================
-           🛠️ CORRECTION UI : FRISE CHRONOLOGIQUE ET CARTES RESPONSIVE
-           ========================================================================== */
+        /* FRISE CHRONOLOGIQUE RESPONSIVE */
         .timeline { position: relative; width: 100%; margin: 0 auto; padding: 0 0 2rem 0; box-sizing: border-box;}
         .timeline::after { content: ''; position: absolute; width: 2px; background-color: var(--line-color); top: 0; bottom: 0; left: 50%; transform: translateX(-50%); }
         .timeline-item { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 3rem; z-index: 2; box-sizing: border-box;}
@@ -95,50 +97,25 @@
         .timeline-card { 
             width: 90%; padding: 1.5rem; background-color: var(--card-bg); border-radius: 12px; 
             box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); box-sizing: border-box; 
-            border: 2px solid transparent; transition: border-color 0.3s;
-            overflow: hidden; /* Empêche tout débordement */
+            border: 2px solid transparent; transition: border-color 0.3s; overflow: hidden;
         }
         
-        /* HEADER DE LA CARTE : Flexbox intelligent pour éviter les chevauchements */
-        .card-header { 
-            display: flex; justify-content: space-between; align-items: flex-start; 
-            margin-bottom: 1rem; gap: 10px; /* Espace vital entre texte et boutons */
-        }
-        
-        /* Groupe Meta (Lieu, Date, Auteur, Badge) qui passe à la ligne proprement */
-        .card-meta-group {
-            display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
-            flex: 1; min-width: 0; /* Empêche le conteneur d'exploser sa largeur max */
-        }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; gap: 10px; }
+        .card-meta-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; flex: 1; min-width: 0; }
+        .card-meta { font-size: 0.8rem; color: var(--accent-color); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin: 0;}
+        .card-author { font-size: 0.75rem; color: var(--text-light); background: rgba(0,0,0,0.04); padding: 3px 8px; border-radius: 12px; white-space: nowrap; }
 
-        .card-meta { 
-            font-size: 0.8rem; color: var(--accent-color); font-weight: bold; 
-            text-transform: uppercase; letter-spacing: 0.5px; margin: 0;
-        }
-        
-        /* Auteur sous forme de petite pilule grise pour la propreté */
-        .card-author { 
-            font-size: 0.75rem; color: var(--text-light); background: rgba(0,0,0,0.04); 
-            padding: 3px 8px; border-radius: 12px; white-space: nowrap; 
-        }
-
-        .badge-new { 
-            display: inline-flex; background: #e74c3c; color: white; font-size: 0.7rem; 
-            padding: 3px 8px; border-radius: 12px; font-weight: bold; 
-            white-space: nowrap; flex-shrink: 0; animation: pop 0.5s ease-out; 
-        }
+        .badge-new { display: inline-flex; background: #e74c3c; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; font-weight: bold; white-space: nowrap; flex-shrink: 0; animation: pop 0.5s ease-out; }
         @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        /* Les boutons protégés de l'écrasement */
         .card-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
         .btn-action { background: none; border: none; font-size: 1.1rem; cursor: pointer; opacity: 0.5; transition: opacity 0.2s; padding: 0; }
         .btn-action:hover { opacity: 1; }
         
-        /* Textes : Couper les mots beaucoup trop longs (comme "Christchurch") si besoin */
         .card-title { margin: 0 0 1rem 0; font-size: 1.3rem; word-break: break-word; }
         .card-text { margin: 0 0 1.5rem 0; line-height: 1.6; color: #4a5568; white-space: pre-wrap; word-break: break-word; }
 
-        /* GALERIE */
+        /* GALERIE AVEC PILULE DISCRETE EN BAS A GAUCHE */
         .card-gallery { position: relative; width: 100%; height: 250px; border-radius: 8px; overflow: hidden; background-color: #dfd5e8; cursor: pointer; transition: transform 0.2s ease; }
         .card-gallery:hover { transform: scale(0.99); }
         .card-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -179,6 +156,7 @@
         .nav-next { right: -60px; }
         .close-lightbox { position: absolute; top: -40px; right: 0; color: white; font-size: 2.5rem; cursor: pointer; line-height: 1; }
 
+        /* NOTIFICATION CATCH-UP TOAST */
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--text-color); color: white; padding: 1rem 2rem; border-radius: 30px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; display: flex; align-items: center; gap: 10px;}
         #toast.show { bottom: 30px; }
 
@@ -207,10 +185,14 @@
                 <h2 style="margin:0; color: var(--accent-color);">Notre Journal</h2>
                 <span id="stats-counter" class="stats-counter">...</span>
             </div>
-            <div class="header-actions">
-                <div class="live-indicator"><div class="live-dot"></div> En direct</div>
-                <button id="btn-logout" class="btn-small">Se déconnecter</button>
-            </div>
+            
+            <button id="btn-logout" class="btn-logout" title="Se déconnecter">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </button>
         </div>
 
         <div class="top-controls">
@@ -222,9 +204,13 @@
             
             <div class="search-box" id="search-box">
                 <input type="text" id="search-input" placeholder="Rechercher un mot, un lieu..." oninput="renderMemories()">
-                <select id="filter-year" onchange="renderMemories()">
-                    <option value="all">Toutes les années</option>
-                </select>
+                
+                <div class="custom-select" id="custom-year-select">
+                    <div class="select-selected" id="custom-year-selected" onclick="toggleYearSelect()">Toutes les années ▾</div>
+                    <div class="select-items" id="custom-year-items">
+                        <div class="select-item" onclick="selectYear('all', 'Toutes les années')">Toutes les années</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -307,7 +293,7 @@
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
-        // 🔑 CONFIGURATION FIREBASE
+        // 🔑 CREDENTIALS CONFIGURATION AUTOMATIQUE
         const firebaseConfig = {
             apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
             authDomain: "notre-journal-93ae5.firebaseapp.com",
@@ -321,9 +307,10 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Variables Globales
+        // Variables Applicatives
         window.allMemories = []; 
         window.currentEditImages = []; 
+        window.currentYearFilter = 'all';
         let currentView = 'list';
         let mapInstance = null;
         let mapMarkers = [];
@@ -331,10 +318,9 @@
         
         const sessionLastSeen = parseInt(localStorage.getItem('mm_last_seen') || '0');
 
-        // UTILITAIRES
+        // PROTECTION CONTRE FAILLES SCRIPT (XSS)
         function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])); }
         function formatDate(dateString) { if(!dateString) return ''; return new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(); }
-        
         function getSavedName() { return localStorage.getItem('mm_username') || "Moi"; }
 
         function showToast(message) {
@@ -354,12 +340,41 @@
             return null;
         }
 
-        // AUTHENTIFICATION & PRENOM
+        // CUSTOM SELECT DROPDOWN LOGIC
+        window.toggleYearSelect = () => {
+            document.getElementById('custom-year-items').classList.toggle('select-show');
+            document.getElementById('custom-year-selected').classList.toggle('active');
+        };
+
+        window.selectYear = (val, label) => {
+            window.currentYearFilter = val;
+            document.getElementById('custom-year-selected').innerHTML = label + ' ▾';
+            document.getElementById('custom-year-items').classList.remove('select-show');
+            document.getElementById('custom-year-selected').classList.remove('active');
+            window.renderMemories();
+        };
+
+        document.addEventListener('click', function(e) {
+            const selectContainer = document.getElementById('custom-year-select');
+            if (selectContainer && !selectContainer.contains(e.target)) {
+                document.getElementById('custom-year-items').classList.remove('select-show');
+                document.getElementById('custom-year-selected').classList.remove('active');
+            }
+        });
+
+        function updateYearFilterDropdown(years) {
+            const container = document.getElementById('custom-year-items');
+            container.innerHTML = '<div class="select-item" onclick="selectYear(\'all\', \'Toutes les années\')">Toutes les années</div>';
+            Array.from(years).sort((a,b)=>b-a).forEach(y => { 
+                container.innerHTML += `<div class="select-item" onclick="selectYear('${y}', '${y}')">${y}</div>`; 
+            });
+        }
+
+        // CYCLE D'AUTHENTIFICATION
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
-                
                 if (!localStorage.getItem('mm_username')) {
                     document.getElementById('modal-name').classList.remove('hidden');
                 } else {
@@ -394,13 +409,12 @@
         
         window.addEventListener('beforeunload', () => { localStorage.setItem('mm_last_seen', Date.now().toString()); });
 
-        // AJOUTER UN SOUVENIR
+        // AJOUTER UN SOUVENIR (CLOUDINARY IDENTIFIERS EN COULISSES)
         document.getElementById('form-add').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.querySelector('#form-add .btn-submit');
             btn.disabled = true; btn.textContent = "Géolocalisation & Envoi... ⏳";
 
-            // 🔑 IDENTIFIANTS CLOUDINARY
             const cloudinaryCloudName = "dac4juzg7"; 
             const cloudinaryPreset = "jy8vjemd";
 
@@ -468,13 +482,12 @@
             finally { btn.disabled = false; btn.textContent = "Mettre à jour"; }
         });
 
-        // SYNCHRONISATION TEMPS RÉEL
+        // LIVE ENGINE (TEMPS RÉEL ET SURVEILLANCE CATCH-UP)
         window.unsubscribeSnapshot = null;
         function loadMemoriesLive() {
             const q = query(collection(db, "memories"), orderBy("date", "desc"));
             
             window.unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
-                
                 if (!isInitialLoad) {
                     snapshot.docChanges().forEach((change) => {
                         const data = change.doc.data();
@@ -499,7 +512,7 @@
 
                 document.getElementById('stats-counter').innerText = `${window.allMemories.length} souvenirs • ${photoCount} photos • ${locationSet.size} lieux`;
 
-                updateYearFilter(yearSet);
+                updateYearFilterDropdown(yearSet);
                 checkOnThisDay();
                 
                 if (currentView === 'list') renderMemories();
@@ -509,14 +522,6 @@
                 isInitialLoad = false;
                 localStorage.setItem('mm_last_seen', Date.now().toString());
             });
-        }
-
-        function updateYearFilter(years) {
-            const select = document.getElementById('filter-year');
-            const currentVal = select.value;
-            select.innerHTML = '<option value="all">Toutes les années</option>';
-            Array.from(years).sort((a,b)=>b-a).forEach(y => { select.innerHTML += `<option value="${y}">${y}</option>`; });
-            select.value = currentVal;
         }
 
         function checkOnThisDay() {
@@ -543,13 +548,13 @@
             }
         }
 
-        // RENDRE LA LISTE AVEC L'UI RESPONSIVE ET LE BADGE
+        // RENDRE LE CONTENU
         window.renderMemories = () => {
             const container = document.getElementById('timeline-container');
             container.innerHTML = ''; 
 
             const searchQuery = document.getElementById('search-input').value.toLowerCase();
-            const yearQuery = document.getElementById('filter-year').value;
+            const yearQuery = window.currentYearFilter;
 
             const filteredMemories = window.allMemories.filter(m => {
                 const matchSearch = (m.title||"").toLowerCase().includes(searchQuery) || (m.location||"").toLowerCase().includes(searchQuery) || (m.story||"").toLowerCase().includes(searchQuery);
@@ -585,7 +590,6 @@
                     }
                 }
 
-                // 🏗️ UTILISATION DE LA NOUVELLE STRUCTURE CSS (card-meta-group)
                 container.insertAdjacentHTML('beforeend', `
                     <div class="timeline-item" id="item-${data.id}">
                         <div class="timeline-dot"></div>
@@ -610,7 +614,6 @@
             });
         };
 
-        // RENDRE LA GALERIE GLOBALE
         window.renderGallery = () => {
             const container = document.getElementById('gallery-container');
             container.innerHTML = '';
@@ -642,7 +645,6 @@
             });
         };
 
-        // GESTION DE LA CARTE LEAFLET
         window.renderMap = () => {
             if (!mapInstance) {
                 mapInstance = L.map('map-container').setView([46.2276, 2.2137], 5);
@@ -664,7 +666,7 @@
             setTimeout(() => { mapInstance.invalidateSize(); if(bounds.length > 0) mapInstance.fitBounds(bounds, {padding: [50, 50], maxZoom: 12}); }, 100);
         };
 
-        // CHANGER DE VUE
+        // NAVIGATION COMPOSANTS
         window.switchView = (view) => {
             currentView = view;
             document.getElementById('tab-list').classList.remove('active');
@@ -705,7 +707,7 @@
             try { await deleteDoc(doc(db, "memories", id)); } catch (e) { alert("Erreur"); }
         };
 
-        // OUVRIR LES MODALES
+        // CONTROLE SYSTEME MODALES (BLOQUER LE FUTUR)
         window.openAddModal = () => { 
             const todayStr = new Date().toISOString().split('T')[0];
             const dateInput = document.getElementById('input-date');
@@ -736,6 +738,7 @@
         };
         window.removeImageFromEdit = (i) => { window.currentEditImages.splice(i, 1); window.renderEditPhotosPreview(); };
 
+        // CORE LIGHTBOX ENGINE
         let currentPhotos = [], currentIndex = 0;
         window.openLightbox = (arr, i) => { currentPhotos = arr; currentIndex = i; document.getElementById('lightbox-img').src = currentPhotos[currentIndex]; document.getElementById('modal-lightbox').classList.remove('hidden'); };
         window.closeLightbox = () => document.getElementById('modal-lightbox').classList.add('hidden');
