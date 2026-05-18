@@ -79,137 +79,97 @@
     <style>
         /* 🎨 THEME VIOLET & UI */
         :root {
-            --bg-color: #faf8fc; /* Un blanc très légèrement teinté de violet */
-            --text-color: #31213e; /* Violet très sombre presque noir */
-            --text-light: #847395; /* Violet grisé pour les dates */
-            --accent-color: #8e44ad; /* Le violet principal (Améthyste) */
-            --line-color: #dfd5e8; /* La ligne temporelle */
+            --bg-color: #faf8fc;
+            --text-color: #31213e;
+            --text-light: #847395;
+            --accent-color: #8e44ad;
+            --line-color: #dfd5e8;
             --card-bg: #ffffff;
         }
 
         body { 
             font-family: system-ui, -apple-system, sans-serif; 
-            background: var(--bg-color); 
-            color: var(--text-color); 
+            background: var(--bg-color); color: var(--text-color); 
             margin: 0; padding: 0;
             display: flex; flex-direction: column; align-items: center;
             min-height: 100vh;
         }
 
-        /* Styles de base... */
         .container { width: 100%; max-width: 400px; padding: 2rem; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; flex-grow: 1; }
         .hidden { display: none !important; }
 
-        /* --- ÉCRAN PRINCIPAL --- */
         #app-screen { width: 100%; max-width: 900px; padding: 1rem; box-sizing: border-box; }
         .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--line-color);}
         .btn-small { background: transparent; border: 1px solid var(--text-light); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
         
-        /* --- CHRONOLOGIE CENTRÉE (Design "Perle sur un fil" pour Mobile) --- */
-        .timeline {
-            position: relative;
-            width: 100%;
-            margin: 0 auto;
-            padding: 2rem 0;
-        }
+        /* --- CHRONOLOGIE (MOBILE FIRST) --- */
+        .timeline { position: relative; width: 100%; margin: 0 auto; padding: 2rem 0; }
 
-        /* La ligne verticale au centre parfait */
         .timeline::after {
             content: ''; position: absolute;
             width: 2px; background-color: var(--line-color);
-            top: 0; bottom: 0; left: 50%;
-            transform: translateX(-50%);
+            top: 0; bottom: 0; left: 50%; transform: translateX(-50%);
         }
 
-        /* Conteneur d'un souvenir (Mobile) */
-        .timeline-item {
-            position: relative;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 3rem;
-            z-index: 2; /* Passe au-dessus de la ligne */
-        }
-
-        /* Le point central */
+        .timeline-item { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 3rem; z-index: 2; }
+        
         .timeline-dot {
-            width: 16px; height: 16px;
-            background-color: var(--accent-color);
-            border: 4px solid var(--bg-color);
-            border-radius: 50%;
-            margin-bottom: 1rem;
-            z-index: 3;
+            width: 16px; height: 16px; background-color: var(--accent-color); border: 4px solid var(--bg-color);
+            border-radius: 50%; margin-bottom: 1rem; z-index: 3; box-sizing: content-box;
         }
 
-        /* La carte (Mobile) */
         .timeline-card {
-            width: 90%; /* Prend presque tout l'écran sur mobile */
-            padding: 1.5rem;
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); /* Ombre violette légère */
-            box-sizing: border-box;
+            width: 90%; padding: 1.5rem; background-color: var(--card-bg); border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); box-sizing: border-box;
         }
 
-        /* --- GALERIE PHOTO INTELLIGENTE --- */
+        /* --- NOUVEL ORDRE DU CONTENU --- */
+        .card-meta { font-size: 0.85rem; color: var(--accent-color); margin-bottom: 0.5rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
+        .card-title { margin: 0 0 1rem 0; font-size: 1.3rem; }
+        .card-text { margin: 0 0 1.5rem 0; line-height: 1.6; color: #4a5568; white-space: pre-wrap; }
+
+        /* --- GALERIE PHOTO (Mode 1 photo avec overlay) --- */
         .card-gallery {
-            display: grid;
-            gap: 4px; /* Espace entre les photos */
-            margin-bottom: 1rem;
-            border-radius: 8px;
-            overflow: hidden;
+            position: relative;
+            width: 100%; max-height: 350px;
+            border-radius: 8px; overflow: hidden;
+            background-color: #f0f0f0; cursor: pointer;
+            transition: transform 0.2s ease;
         }
-        /* 1 photo */
-        .card-gallery[data-count="1"] { grid-template-columns: 1fr; }
-        /* 2 photos */
-        .card-gallery[data-count="2"] { grid-template-columns: 1fr 1fr; }
-        /* 3 photos (La première est grande, les deux autres en dessous) */
-        .card-gallery[data-count="3"] { grid-template-columns: 1fr 1fr; }
-        .card-gallery[data-count="3"] img:first-child { grid-column: 1 / -1; }
+        
+        .card-gallery:hover { transform: scale(0.99); }
 
-        .card-gallery img {
-            width: 100%;
-            height: 100%;
-            max-height: 400px;
-            object-fit: cover; /* Recadre proprement sans déformer (portrait ou paysage) */
-            background-color: #f0f0f0;
+        .card-gallery img { width: 100%; height: 100%; max-height: 350px; object-fit: cover; display: block; }
+
+        /* L'overlay sombre avec le texte +X */
+        .card-gallery.has-more::after {
+            content: attr(data-more);
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(49, 33, 62, 0.5); /* Violet sombre transparent */
+            color: white; font-size: 2.5rem; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* Contenu texte */
-        .card-meta { font-size: 0.85rem; color: var(--accent-color); margin-bottom: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
-        .card-title { margin: 0 0 0.5rem 0; font-size: 1.3rem; }
-        .card-text { margin: 0; line-height: 1.6; color: #4a5568; }
-
-        /* --- ADAPTATION PC (Cartes alternées) --- */
+        /* --- ADAPTATION PC --- */
         @media screen and (min-width: 768px) {
-            .timeline-item {
-                width: 50%;
-                display: block; /* On retire le flex column du mobile */
-                margin-bottom: 0;
-            }
+            .timeline-item { width: 50%; display: block; margin-bottom: 0; }
+            .timeline-card { width: 100%; text-align: left; }
             
-            /* Pairs à droite, Impairs à gauche */
-            .timeline-item:nth-child(even) { left: 50%; padding: 2rem 0 2rem 3rem; }
             .timeline-item:nth-child(odd) { left: 0; padding: 2rem 3rem 2rem 0; text-align: right; }
+            .timeline-item:nth-child(even) { left: 50%; padding: 2rem 0 2rem 3rem; }
 
-            /* On cache le dot mobile et on le recrée sur le côté pour le PC */
             .timeline-dot { display: none; }
             
+            /* Point infailliblement centré sur la ligne centrale */
             .timeline-item::after {
                 content: ''; position: absolute;
-                width: 16px; height: 16px;
-                background-color: var(--accent-color);
-                border: 4px solid var(--bg-color);
-                border-radius: 50%;
-                top: 50%; transform: translateY(-50%);
-                z-index: 3;
+                width: 16px; height: 16px; background-color: var(--accent-color); border: 4px solid var(--bg-color);
+                border-radius: 50%; top: 50%; z-index: 3; box-sizing: content-box;
             }
             
-            .timeline-item:nth-child(odd)::after { right: -12px; }
-            .timeline-item:nth-child(even)::after { left: -12px; }
-
-            .timeline-card { width: 100%; text-align: left; }
+            /* On place le point au bord exact de la moitié de l'écran, et on le translate de 50% de sa propre taille */
+            .timeline-item:nth-child(odd)::after { right: 0; transform: translate(50%, -50%); }
+            .timeline-item:nth-child(even)::after { left: 0; transform: translate(-50%, -50%); }
         }
     </style>
 </head>
@@ -239,15 +199,22 @@
                 <div class="timeline-dot"></div>
                 <div class="timeline-card">
                     <div class="card-meta">📍 Calanques — 18 Mai 2026</div>
-                    
-                    <div class="card-gallery" data-count="3">
-                        <img src="https://images.unsplash.com/photo-1543158022-7798363dbab8?auto=format&fit=crop&w=800&q=80" alt="Paysage">
-                        <img src="https://images.unsplash.com/photo-1516733968668-dbdce39c4651?auto=format&fit=crop&w=400&q=80" alt="Portrait">
-                        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80" alt="Détail">
-                    </div>
-
                     <h3 class="card-title">Week-end dans le sud</h3>
-                    <p class="card-text">L'eau était gelée mais les paysages incroyables. On a marché pendant des heures pour trouver cette crique secrète.</p>
+                    <p class="card-text">L'eau était gelée mais les paysages incroyables. On a marché pendant des heures pour trouver cette crique secrète. 
+C'était sûrement la meilleure décision du voyage, même si on a failli se perdre au retour !</p>
+                    
+                    <div class="card-gallery has-more" data-more="+3">
+                        <img src="https://images.unsplash.com/photo-1543158022-7798363dbab8?auto=format&fit=crop&w=800&q=80" alt="Souvenir principal" loading="lazy">
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="card-meta">💭 Pensée — 15 Mai 2026</div>
+                    <h3 class="card-title">Juste un mot</h3>
+                    <p class="card-text">Je repensais à notre première rencontre ce matin. Le temps passe si vite.</p>
                 </div>
             </div>
 
@@ -255,24 +222,15 @@
                 <div class="timeline-dot"></div>
                 <div class="timeline-card">
                     <div class="card-meta">🏠 Chez nous — 10 Mai 2026</div>
-                    
-                    <div class="card-gallery" data-count="1">
-                        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80" alt="Souvenir">
-                    </div>
-
                     <h3 class="card-title">Soirée jeux de société</h3>
                     <p class="card-text">Tu as encore gagné, je commence à soupçonner de la triche. Mais la pizza a compensé ma défaite.</p>
+                    
+                    <div class="card-gallery">
+                        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80" alt="Souvenir" loading="lazy">
+                    </div>
                 </div>
             </div>
 
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-card">
-                    <div class="card-meta">💭 Pensée — 5 Mai 2026</div>
-                    <h3 class="card-title">Juste un mot</h3>
-                    <p class="card-text">Je repensais à notre première rencontre ce matin. Le temps passe si vite.</p>
-                </div>
-            </div>
         </div>
     </div>
 
