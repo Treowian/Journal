@@ -81,8 +81,10 @@
         :root {
             --bg-color: #fdfbf7;
             --text-color: #2c3e50;
-            --accent-color: #d35400;
-            --border-color: #e0dcd3;
+            --text-light: #7f8c8d;
+            --accent-color: #d35400; /* Une couleur chaude, tu pourras changer */
+            --line-color: #e0dcd3;
+            --card-bg: #ffffff;
         }
 
         body { 
@@ -97,55 +99,99 @@
             min-height: 100vh;
         }
 
-        .container {
-            width: 100%;
-            max-width: 400px;
-            padding: 2rem;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            flex-grow: 1;
-        }
-
-        .title { text-align: center; margin-bottom: 0.5rem; color: var(--text-color); }
-        .subtitle { text-align: center; color: #7f8c8d; margin-top: 0; margin-bottom: 2rem; font-size: 0.9rem;}
-
-        form { display: flex; flex-direction: column; gap: 1rem; }
-        
-        input {
-            padding: 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: #fff;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        input:focus { border-color: var(--accent-color); }
-
-        .btn-primary {
-            background: var(--text-color);
-            color: #fff;
-            border: none;
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            margin-top: 1rem;
-        }
-        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .error-msg { color: #c0392b; font-size: 0.9rem; text-align: center; margin-top: 0.5rem; }
+        /* Garde le style de ton login ici... */
+        .container { width: 100%; max-width: 400px; padding: 2rem; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; flex-grow: 1; }
         .hidden { display: none !important; }
 
-        /* Écran app de base */
-        #app-screen { width: 100%; max-width: 600px; padding: 2rem; box-sizing: border-box; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 2rem; }
-        .btn-small { background: transparent; border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
+        /* --- ÉCRAN PRINCIPAL --- */
+        #app-screen { width: 100%; max-width: 1000px; padding: 1rem; box-sizing: border-box; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 2rem; }
+        .btn-small { background: transparent; border: 1px solid var(--text-light); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
+        
+        /* --- CHRONOLOGIE (MOBILE FIRST) --- */
+        .timeline {
+            position: relative;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* La ligne verticale (À gauche sur mobile) */
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            background-color: var(--line-color);
+            top: 0;
+            bottom: 0;
+            left: 20px; /* Positionnée à gauche */
+            margin-left: -1px;
+        }
+
+        /* Le conteneur d'un souvenir */
+        .timeline-item {
+            padding: 10px 0 30px 50px; /* Espace à gauche pour la ligne */
+            position: relative;
+            background-color: inherit;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Le petit point sur la ligne */
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            right: auto;
+            left: 12px; /* Positionné sur la ligne de gauche */
+            background-color: var(--accent-color);
+            border: 4px solid var(--bg-color);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        /* La carte en elle-même */
+        .timeline-card {
+            padding: 1.5rem;
+            background-color: var(--card-bg);
+            position: relative;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        /* Contenu de la carte */
+        .card-meta { font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;}
+        .card-title { margin: 0 0 0.5rem 0; font-size: 1.3rem; }
+        .card-text { margin: 0; line-height: 1.6; color: #4a5568; }
+        .card-image { width: 100%; border-radius: 8px; margin-bottom: 1rem; object-fit: cover; max-height: 300px; background-color: #f0f0f0;}
+
+        /* --- ADAPTATION PC (Écrans > 768px) --- */
+        @media screen and (min-width: 768px) {
+            .timeline::after {
+                left: 50%; /* La ligne passe au centre */
+            }
+            
+            .timeline-item {
+                width: 50%;
+                padding: 10px 40px 30px 40px;
+            }
+            
+            /* Les éléments pairs vont à droite */
+            .timeline-item:nth-child(even) {
+                left: 50%;
+            }
+            
+            /* Les éléments impairs restent à gauche */
+            .timeline-item:nth-child(odd) {
+                left: 0;
+            }
+
+            /* Replacer les points au centre */
+            .timeline-item:nth-child(odd)::after { left: auto; right: -10px; }
+            .timeline-item:nth-child(even)::after { left: -10px; }
+        }
     </style>
 </head>
 <body>
@@ -164,11 +210,36 @@
 
     <div id="app-screen" class="hidden">
         <div class="header">
-            <h2 style="margin:0;">Journal</h2>
+            <h2 style="margin:0;">Notre Journal</h2>
             <button id="btn-logout" class="btn-small">Se déconnecter</button>
         </div>
         
-        <p style="text-align:center; color:#7f8c8d; font-style:italic;">La chronologie apparaîtra ici...</p>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-card">
+                    <div class="card-meta">📍 Vieux-Port, Marseille — 18 Mai 2026</div>
+                    <img src="https://images.unsplash.com/photo-1543158022-7798363dbab8?auto=format&fit=crop&w=600&q=80" alt="Souvenir" class="card-image">
+                    <h3 class="card-title">Première glace de l'été</h3>
+                    <p class="card-text">Une journée magnifique passée à se promener. On a failli rater le bateau, mais la vue en valait la peine.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-card">
+                    <div class="card-meta">🏠 À la maison — 15 Mai 2026</div>
+                    <h3 class="card-title">Soirée cinéma improvisée</h3>
+                    <p class="card-text">On a finalement regardé ce film dont tu me parlais depuis des mois. J'avoue que tu avais raison, c'était un chef-d'œuvre !</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-card">
+                    <div class="card-meta">🌳 Parc Borély — 10 Mai 2026</div>
+                    <h3 class="card-title">Pique-nique sous les arbres</h3>
+                    <p class="card-text">Le vent s'est levé mais on a quand même réussi à finir notre repas avant l'orage.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
 </body>
