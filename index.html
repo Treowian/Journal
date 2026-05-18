@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Notre Histoire</title>
     
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-        import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+        // NOUVEAUX IMPORTS POUR LA BASE DE DONNÉES ET LE STOCKAGE
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
-        // ⚠️ REMPLACE CECI PAR TA CONFIGURATION FIREBASE (Étape 3 précédente)
+        // ⚠️ TA CONFIGURATION FIREBASE ICI
         const firebaseConfig = {
   apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
   authDomain: "notre-journal-93ae5.firebaseapp.com",
@@ -26,55 +26,208 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        // --- LOGIQUE DE CONNEXION ---
+        // ==========================================
+        // 1. UTILITAIRES & SÉCURITÉ
+        // ==========================================
 
-        // 1. Écouter les changements d'état (Connecté ou non ?)
+        // Bloque les injections de code (Faille XSS) dans le HTML
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag]));
+        }
+
+        // Formater la date en français (ex: 18 MAI 2026)
+        function formatDate(dateString) {
+            if(!dateString) return '';
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString('fr-FR', options).toUpperCase();
+        }
+
+        // ==========================================
+        // 2. GESTION DE LA CONNEXION
+        // ==========================================
+
         onAuthStateChanged(auth, (user) => {
-            const loginScreen = document.getElementById('login-screen');
-            const appScreen = document.getElementById('app-screen');
-            
             if (user) {
-                // L'utilisateur est connecté, on affiche le journal
-                loginScreen.classList.add('hidden');
-                appScreen.classList.remove('hidden');
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                loadMemories(); // On charge les souvenirs une fois connecté !
             } else {
-                // Pas d'utilisateur, on affiche l'écran de connexion
-                loginScreen.classList.remove('hidden');
-                appScreen.classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('app-screen').classList.add('hidden');
             }
         });
 
-        // 2. Gérer la soumission du formulaire
         document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Empêche le rechargement de la page
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            e.preventDefault();
             const btn = document.getElementById('btn-login');
-            const errorMsg = document.getElementById('login-error');
+            btn.disabled = true; btn.textContent = "Vérification...";
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
+            } catch (error) {
+                document.getElementById('login-error').classList.remove('hidden');
+                btn.disabled = false; btn.textContent = "Entrer";
+            }
+        });
 
-            btn.disabled = true;
-            btn.textContent = "Vérification...";
-            errorMsg.classList.add('hidden');
+        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+        // ==========================================
+        // 3. CRÉATION D'UN SOUVENIR (UPLOAD + SAUVEGARDE)
+        // ==========================================
+
+        document.getElementById('form-add').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.querySelector('.btn-submit');
+            btn.disabled = true; 
+            btn.textContent = "Envoi en cours... ⏳"; // Feedback visuel crucial
 
             try {
-                // Tente la connexion Firebase
-                await signInWithEmailAndPassword(auth, email, password);
-                // Si ça réussit, le onAuthStateChanged au-dessus prendra le relais
+                // 1. Récupération des données du formulaire
+                const date = document.getElementById('input-date').value;
+                const location = document.getElementById('input-location').value;
+                const title = document.getElementById('input-title').value;
+                const story = document.getElementById('input-story').value;
+                const files = document.getElementById('input-photos').files;
+
+                // 2. Upload des images vers Firebase Storage
+                const imageUrls = [];
+                for (const file of files) {
+                    // On crée un nom unique pour éviter d'écraser des photos portant le même nom
+                    const fileRef = ref(storage, `photos/${Date.now()}_${file.name}`);
+                    await uploadBytes(fileRef, file);
+                    const url = await getDownloadURL(fileRef);
+                    imageUrls.push(url);
+                }
+
+                // 3. Sauvegarde du texte et des URLs des images dans Firestore
+                await addDoc(collection(db, "memories"), {
+                    date: date,
+                    location: location,
+                    title: title,
+                    story: story,
+                    images: imageUrls,
+                    timestamp: serverTimestamp() // Pour trier infailliblement
+                });
+
+                // 4. Succès : On nettoie et on recharge
+                document.getElementById('form-add').reset();
+                closeAddModal();
+                loadMemories();
+
             } catch (error) {
-                // Si ça échoue (mauvais mot de passe, etc.)
-                console.error(error);
-                errorMsg.classList.remove('hidden');
-                btn.disabled = false;
-                btn.textContent = "Entrer";
+                console.error("Erreur de sauvegarde:", error);
+                alert("Mince, une erreur est survenue lors de la sauvegarde.");
+            } finally {
+                btn.disabled = false; 
+                btn.textContent = "Sauvegarder";
             }
         });
 
-        // 3. Gérer la déconnexion
-        document.getElementById('btn-logout').addEventListener('click', () => {
-            signOut(auth);
-        });
-    </script>
+        // ==========================================
+        // 4. AFFICHAGE DE LA CHRONOLOGIE
+        // ==========================================
+
+        async function loadMemories() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light);">Chargement de vos souvenirs...</p>';
+
+            // On demande à Firebase les souvenirs, triés du plus récent au plus ancien
+            const q = query(collection(db, "memories"), orderBy("date", "desc"));
+            const snapshot = await getDocs(q);
+
+            container.innerHTML = ''; // On vide le conteneur
+
+            if (snapshot.empty) {
+                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light);">Votre journal est vierge. Cliquez sur le + pour commencer !</p>';
+                return;
+            }
+
+            // On construit le HTML pour chaque souvenir
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                
+                // Sécurité : on nettoie les textes
+                const safeLocation = escapeHTML(data.location);
+                const safeTitle = escapeHTML(data.title);
+                const safeStory = escapeHTML(data.story);
+                const displayDate = formatDate(data.date);
+
+                // Gestion de la galerie (0, 1 ou plusieurs images)
+                let galleryHTML = '';
+                if (data.images && data.images.length > 0) {
+                    const firstImage = data.images[0];
+                    if (data.images.length === 1) {
+                        // Une seule image, clic simple
+                        galleryHTML = `
+                            <div class="card-gallery" onclick="openLightbox(['${firstImage}'], 0)">
+                                <img src="${firstImage}" alt="Souvenir" loading="lazy">
+                            </div>`;
+                    } else {
+                        // Plusieurs images, on affiche le +X
+                        const extraCount = data.images.length - 1;
+                        // On transforme le tableau d'images en chaîne pour le passer à la fonction onclick
+                        const imagesArrayString = JSON.stringify(data.images).replace(/"/g, '&quot;');
+                        
+                        galleryHTML = `
+                            <div class="card-gallery has-more" data-more="+${extraCount}" onclick="openLightbox(${imagesArrayString}, 0)">
+                                <img src="${firstImage}" alt="Souvenir principal" loading="lazy">
+                            </div>`;
+                    }
+                }
+
+                // Construction de la carte complète
+                const cardHTML = `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-card">
+                            <div class="card-meta">
+                                ${safeLocation ? `📍 ${safeLocation} — ` : ''}${displayDate}
+                            </div>
+                            <h3 class="card-title">${safeTitle}</h3>
+                            <p class="card-text">${safeStory}</p>
+                            ${galleryHTML}
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        // ==========================================
+        // 5. FONCTIONS GLOBALES (Accessibles depuis le HTML)
+        // ==========================================
+        
+        window.openAddModal = () => document.getElementById('modal-add').classList.remove('hidden');
+        window.closeAddModal = () => document.getElementById('modal-add').classList.add('hidden');
+        
+        // Logique de la Lightbox
+        let currentPhotos = [];
+        let currentIndex = 0;
+
+        window.openLightbox = (photosArray, index) => {
+            currentPhotos = photosArray;
+            currentIndex = index;
+            document.getElementById('lightbox-img').src = currentPhotos[currentIndex];
+            document.getElementById('modal-lightbox').classList.remove('hidden');
+        };
+
+        window.closeLightbox = () => document.getElementById('modal-lightbox').classList.add('hidden');
+
+        window.prevPhoto = () => {
+            if(currentPhotos.length === 0) return;
+            currentIndex = (currentIndex === 0) ? currentPhotos.length - 1 : currentIndex - 1;
+            document.getElementById('lightbox-img').src = currentPhotos[currentIndex];
+        };
+
+        window.nextPhoto = () => {
+            if(currentPhotos.length === 0) return;
+            currentIndex = (currentIndex === currentPhotos.length - 1) ? 0 : currentIndex + 1;
+            document.getElementById('lightbox-img').src = currentPhotos[currentIndex];
+        };
 
     <style>
         /* 🎨 THEME VIOLET & UI */
