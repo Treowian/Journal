@@ -5,281 +5,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Notre Histoire</title>
     
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        // NOUVEAUX IMPORTS POUR LA BASE DE DONNÉES ET LE STOCKAGE
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
-
-        // ⚠️ TA CONFIGURATION FIREBASE ICI
-        const firebaseConfig = {
-  apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
-  authDomain: "notre-journal-93ae5.firebaseapp.com",
-  projectId: "notre-journal-93ae5",
-  storageBucket: "notre-journal-93ae5.firebasestorage.app",
-  messagingSenderId: "949489326058",
-  appId: "1:949489326058:web:3b77c41d414ff011e14493"
-};
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-
-        // ==========================================
-        // 1. UTILITAIRES & SÉCURITÉ
-        // ==========================================
-
-        // Bloque les injections de code (Faille XSS) dans le HTML
-        function escapeHTML(str) {
-            if (!str) return '';
-            return str.replace(/[&<>'"]/g, tag => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-            }[tag]));
-        }
-
-        // Formater la date en français (ex: 18 MAI 2026)
-        function formatDate(dateString) {
-            if(!dateString) return '';
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            return new Date(dateString).toLocaleDateString('fr-FR', options).toUpperCase();
-        }
-
-        // ==========================================
-        // 2. GESTION DE LA CONNEXION
-        // ==========================================
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                loadMemories(); // On charge les souvenirs une fois connecté !
-            } else {
-                document.getElementById('login-screen').classList.remove('hidden');
-                document.getElementById('app-screen').classList.add('hidden');
-            }
-        });
-
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-login');
-            btn.disabled = true; btn.textContent = "Vérification...";
-            try {
-                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
-            } catch (error) {
-                document.getElementById('login-error').classList.remove('hidden');
-                btn.disabled = false; btn.textContent = "Entrer";
-            }
-        });
-
-        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
-
-        // ==========================================
-        // 3. CRÉATION D'UN SOUVENIR (UPLOAD + SAUVEGARDE)
-        // ==========================================
-
-        document.getElementById('form-add').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.querySelector('.btn-submit');
-            btn.disabled = true; 
-            btn.textContent = "Envoi en cours... ⏳"; // Feedback visuel crucial
-
-            try {
-                // 1. Récupération des données du formulaire
-                const date = document.getElementById('input-date').value;
-                const location = document.getElementById('input-location').value;
-                const title = document.getElementById('input-title').value;
-                const story = document.getElementById('input-story').value;
-                const files = document.getElementById('input-photos').files;
-
-                // 2. Upload des images vers Firebase Storage
-                const imageUrls = [];
-                for (const file of files) {
-                    // On crée un nom unique pour éviter d'écraser des photos portant le même nom
-                    const fileRef = ref(storage, `photos/${Date.now()}_${file.name}`);
-                    await uploadBytes(fileRef, file);
-                    const url = await getDownloadURL(fileRef);
-                    imageUrls.push(url);
-                }
-
-                // 3. Sauvegarde du texte et des URLs des images dans Firestore
-                await addDoc(collection(db, "memories"), {
-                    date: date,
-                    location: location,
-                    title: title,
-                    story: story,
-                    images: imageUrls,
-                    timestamp: serverTimestamp() // Pour trier infailliblement
-                });
-
-                // 4. Succès : On nettoie et on recharge
-                document.getElementById('form-add').reset();
-                closeAddModal();
-                loadMemories();
-
-            } catch (error) {
-                console.error("Erreur de sauvegarde:", error);
-                alert("Mince, une erreur est survenue lors de la sauvegarde.");
-            } finally {
-                btn.disabled = false; 
-                btn.textContent = "Sauvegarder";
-            }
-        });
-
-        // ==========================================
-        // 4. AFFICHAGE DE LA CHRONOLOGIE
-        // ==========================================
-
-        async function loadMemories() {
-            const container = document.getElementById('timeline-container');
-            container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light);">Chargement de vos souvenirs...</p>';
-
-            // On demande à Firebase les souvenirs, triés du plus récent au plus ancien
-            const q = query(collection(db, "memories"), orderBy("date", "desc"));
-            const snapshot = await getDocs(q);
-
-            container.innerHTML = ''; // On vide le conteneur
-
-            if (snapshot.empty) {
-                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light);">Votre journal est vierge. Cliquez sur le + pour commencer !</p>';
-                return;
-            }
-
-            // On construit le HTML pour chaque souvenir
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                
-                // Sécurité : on nettoie les textes
-                const safeLocation = escapeHTML(data.location);
-                const safeTitle = escapeHTML(data.title);
-                const safeStory = escapeHTML(data.story);
-                const displayDate = formatDate(data.date);
-
-                // Gestion de la galerie (0, 1 ou plusieurs images)
-                let galleryHTML = '';
-                if (data.images && data.images.length > 0) {
-                    const firstImage = data.images[0];
-                    if (data.images.length === 1) {
-                        // Une seule image, clic simple
-                        galleryHTML = `
-                            <div class="card-gallery" onclick="openLightbox(['${firstImage}'], 0)">
-                                <img src="${firstImage}" alt="Souvenir" loading="lazy">
-                            </div>`;
-                    } else {
-                        // Plusieurs images, on affiche le +X
-                        const extraCount = data.images.length - 1;
-                        // On transforme le tableau d'images en chaîne pour le passer à la fonction onclick
-                        const imagesArrayString = JSON.stringify(data.images).replace(/"/g, '&quot;');
-                        
-                        galleryHTML = `
-                            <div class="card-gallery has-more" data-more="+${extraCount}" onclick="openLightbox(${imagesArrayString}, 0)">
-                                <img src="${firstImage}" alt="Souvenir principal" loading="lazy">
-                            </div>`;
-                    }
-                }
-
-                // Construction de la carte complète
-                const cardHTML = `
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-card">
-                            <div class="card-meta">
-                                ${safeLocation ? `📍 ${safeLocation} — ` : ''}${displayDate}
-                            </div>
-                            <h3 class="card-title">${safeTitle}</h3>
-                            <p class="card-text">${safeStory}</p>
-                            ${galleryHTML}
-                        </div>
-                    </div>
-                `;
-                
-                container.insertAdjacentHTML('beforeend', cardHTML);
-            });
-        }
-
-        // ==========================================
-        // 5. FONCTIONS GLOBALES (Accessibles depuis le HTML)
-        // ==========================================
-        
-        window.openAddModal = () => document.getElementById('modal-add').classList.remove('hidden');
-        window.closeAddModal = () => document.getElementById('modal-add').classList.add('hidden');
-        
-        // Logique de la Lightbox
-        let currentPhotos = [];
-        let currentIndex = 0;
-
-        window.openLightbox = (photosArray, index) => {
-            currentPhotos = photosArray;
-            currentIndex = index;
-            document.getElementById('lightbox-img').src = currentPhotos[currentIndex];
-            document.getElementById('modal-lightbox').classList.remove('hidden');
-        };
-
-        window.closeLightbox = () => document.getElementById('modal-lightbox').classList.add('hidden');
-
-        window.prevPhoto = () => {
-            if(currentPhotos.length === 0) return;
-            currentIndex = (currentIndex === 0) ? currentPhotos.length - 1 : currentIndex - 1;
-            document.getElementById('lightbox-img').src = currentPhotos[currentIndex];
-        };
-
-        window.nextPhoto = () => {
-            if(currentPhotos.length === 0) return;
-            currentIndex = (currentIndex === currentPhotos.length - 1) ? 0 : currentIndex + 1;
-            document.getElementById('lightbox-img').src = currentPhotos[currentIndex];
-        };
-
     <style>
-        /* 🎨 THEME VIOLET & UI */
+        /* ==========================================================================
+           🎨 SYSTEME DE DESIGN & VARIABLES (THEME VIOLET AMETHYSTE)
+           ========================================================================== */
         :root {
-            --bg-color: #faf8fc;
-            --text-color: #31213e;
-            --text-light: #847395;
-            --accent-color: #8e44ad;
-            --line-color: #dfd5e8;
-            --card-bg: #ffffff;
+            --bg-color: #faf8fc;      /* Blanc doux teinté de violet */
+            --text-color: #31213e;    /* Violet très sombre profond */
+            --text-light: #847395;    /* Violet grisé pour les dates et labels */
+            --accent-color: #8e44ad;  /* Violet Améthyste principal */
+            --line-color: #dfd5e8;    /* Ligne de la frise chronologique */
+            --card-bg: #ffffff;       /* Fond des cartes */
+            --error-color: #c0392b;   /* Rouge sécurité */
         }
 
         body { 
             font-family: system-ui, -apple-system, sans-serif; 
-            background: var(--bg-color); color: var(--text-color); 
+            background: var(--bg-color); 
+            color: var(--text-color); 
             margin: 0; padding: 0;
             display: flex; flex-direction: column; align-items: center;
             min-height: 100vh;
-            overflow-x: hidden; /* Empêche le scroll horizontal accidentel */
+            overflow-x: hidden;
         }
 
         .hidden { display: none !important; }
 
+        /* ==========================================================================
+           🔒 ECRAN DE CONNEXION (MOBILE-FIRST)
+           ========================================================================== */
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .login-title { text-align: center; margin-bottom: 0.5rem; color: var(--text-color); font-size: 2rem; }
+        .login-subtitle { text-align: center; color: var(--text-light); margin-top: 0; margin-bottom: 2rem; font-size: 0.9rem;}
+
+        .login-form { display: flex; flex-direction: column; gap: 1rem; }
+        .login-form input {
+            padding: 1rem;
+            border: 1px solid var(--line-color);
+            border-radius: 8px;
+            background: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .login-form input:focus { border-color: var(--accent-color); }
+
+        .btn-primary {
+            background: var(--text-color);
+            color: #fff; border: none; padding: 1rem;
+            border-radius: 8px; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; transition: opacity 0.2s; margin-top: 1rem;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .error-msg { color: var(--error-color); font-size: 0.9rem; text-align: center; margin-top: 0.5rem; }
+
+        /* ==========================================================================
+           👑 ECRAN PRINCIPAL INTERFACE JOURNAL
+           ========================================================================== */
         #app-screen { width: 100%; max-width: 900px; padding: 1rem; box-sizing: border-box; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--line-color);}
-        .btn-small { background: transparent; border: 1px solid var(--text-light); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
         
-        /* --- CHRONOLOGIE (MOBILE FIRST) --- */
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding-bottom: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--line-color);
+        }
+        .btn-small { 
+            background: transparent; border: 1px solid var(--text-light); 
+            color: var(--text-color); padding: 0.5rem 1rem; border-radius: 20px; 
+            cursor: pointer; font-size: 0.8rem; 
+        }
+        
+        /* ==========================================================================
+           ⏳ FRISE CHRONOLOGIQUE CENTRÉE (MOBILE-FIRST : PERLE SUR UN FIL)
+           ========================================================================== */
         .timeline { position: relative; width: 100%; margin: 0 auto; padding: 2rem 0; box-sizing: border-box;}
 
+        /* Ligne centrale parfaite */
         .timeline::after {
             content: ''; position: absolute;
             width: 2px; background-color: var(--line-color);
             top: 0; bottom: 0; left: 50%; transform: translateX(-50%);
         }
 
-        .timeline-item { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 3rem; z-index: 2; box-sizing: border-box;}
+        /* Conteneur de souvenir */
+        .timeline-item { 
+            position: relative; width: 100%; 
+            display: flex; flex-direction: column; align-items: center; 
+            margin-bottom: 3rem; z-index: 2; box-sizing: border-box;
+        }
         
+        /* Le point sur mobile */
         .timeline-dot {
             width: 16px; height: 16px; background-color: var(--accent-color); border: 4px solid var(--bg-color);
             border-radius: 50%; margin-bottom: 1rem; z-index: 3; box-sizing: content-box;
         }
 
+        /* La carte souvenir */
         .timeline-card {
             width: 90%; padding: 1.5rem; background-color: var(--card-bg); border-radius: 12px;
             box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); box-sizing: border-box;
         }
 
+        /* Anatomie et ordre du contenu */
         .card-meta { font-size: 0.85rem; color: var(--accent-color); margin-bottom: 0.5rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
         .card-title { margin: 0 0 1rem 0; font-size: 1.3rem; }
         .card-text { margin: 0 0 1.5rem 0; line-height: 1.6; color: #4a5568; white-space: pre-wrap; }
 
+        /* Album Photo Imbriquée */
         .card-gallery {
             position: relative; width: 100%; height: 250px;
             border-radius: 8px; overflow: hidden;
@@ -289,6 +131,7 @@
         .card-gallery:hover { transform: scale(0.99); }
         .card-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+        /* Filtre +X si plusieurs photos */
         .card-gallery.has-more::after {
             content: attr(data-more);
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -296,103 +139,107 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* --- CORRECTION INFAILLIBLE ADAPTATION PC --- */
+        /* ==========================================================================
+           🖥️ ADAPTATION ECRANS PC (ALIGNEMENT ET EFFET ALTERNÉ)
+           ========================================================================== */
         @media screen and (min-width: 768px) {
-            .timeline-item { 
-                width: 50%; display: flex; flex-direction: column; 
-                margin-bottom: 0; box-sizing: border-box;
-            }
+            .timeline-item { width: 50%; display: flex; flex-direction: column; margin-bottom: 0; box-sizing: border-box;}
             .timeline-card { width: 100%; text-align: left; }
             
-            /* On repousse les cartes de 3rem par rapport au centre */
+            /* Distanciation et orientation alternée par rapport au centre */
             .timeline-item:nth-child(odd) { left: 0; padding: 2rem 3rem 2rem 0; align-items: flex-end; }
             .timeline-item:nth-child(even) { left: 50%; padding: 2rem 0 2rem 3rem; align-items: flex-start; }
 
             .timeline-dot { display: none; }
             
-            /* Le point vient s'ancrer exactement sur le bord du conteneur (qui est au centre de l'écran) */
+            /* Ancrage du point mathématiquement irréprochable au centre horizontal */
             .timeline-item::after {
                 content: ''; position: absolute;
                 width: 16px; height: 16px; background-color: var(--accent-color); border: 4px solid var(--bg-color);
                 border-radius: 50%; top: 50%; z-index: 3; box-sizing: content-box;
             }
-            
-            /* Transform translate -50% centre parfaitement le point sur la ligne */
             .timeline-item:nth-child(odd)::after { left: 100%; transform: translate(-50%, -50%); }
             .timeline-item:nth-child(even)::after { left: 0; transform: translate(-50%, -50%); }
         }
 
-        /* --- BOUTON FLOTTANT (FAB) --- */
+        /* ==========================================================================
+           ➕ BOUTON INTERACTIF FLOTTANT (FAB)
+           ========================================================================== */
         .fab {
             position: fixed; bottom: 30px; right: 30px;
             width: 60px; height: 60px; border-radius: 50%;
             background-color: var(--accent-color); color: white;
-            border: none; font-size: 2rem; font-weight: 300;
+            border: none; font-size: 2.3rem; font-weight: 300;
             box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
             cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center;
             transition: transform 0.2s;
         }
         .fab:hover { transform: scale(1.1); }
 
-        /* --- MODALES (Filtre sombre + Pop-up) --- */
+        /* ==========================================================================
+           📦 FENÊTRES POP-UP MODALES & FORMULAIRES
+           ========================================================================== */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(49, 33, 62, 0.8); z-index: 100;
             display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
         }
         
         .modal-box {
-            background: var(--card-bg); width: 90%; max-width: 500px;
+            background: var(--card-bg); width: 95%; max-width: 500px;
             padding: 2rem; border-radius: 12px; max-height: 90vh; overflow-y: auto;
-            box-sizing: border-box;
+            box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
         .modal-title { margin-top: 0; color: var(--accent-color); }
-        .form-group { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
-        .form-group label { font-size: 0.9rem; color: var(--text-light); font-weight: bold; }
+        .form-group { margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-group label { font-size: 0.85rem; color: var(--text-light); font-weight: bold; text-transform: uppercase;}
         .form-group input, .form-group textarea {
             padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px;
-            font-family: inherit; font-size: 1rem; outline: none;
+            font-family: inherit; font-size: 1rem; outline: none; background: #fff; color: var(--text-color);
         }
         .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-color); }
-        .form-group textarea { resize: vertical; min-height: 100px; }
+        .form-group textarea { resize: vertical; min-height: 120px; }
         
-        .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
-        .btn-cancel { background: transparent; border: none; color: var(--text-light); font-weight: bold; cursor: pointer; }
-        .btn-submit { background: var(--accent-color); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 1.5rem; margin-top: 2rem; }
+        .btn-cancel { background: transparent; border: none; color: var(--text-light); font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .btn-submit { background: var(--accent-color); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
 
-        /* --- LIGHTBOX (Visionneuse photo) --- */
-        .lightbox-content { position: relative; width: 100%; max-width: 800px; display: flex; align-items: center; justify-content: center; }
-        .lightbox-img { max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        /* ==========================================================================
+           🖼️ LIGHTBOX (VISIONNEUSE ALBUM PHOTO HD)
+           ========================================================================== */
+        .lightbox-content { position: relative; width: 95%; max-width: 800px; display: flex; align-items: center; justify-content: center; }
+        .lightbox-img { max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); object-fit: contain; }
         .lightbox-nav {
             background: rgba(255,255,255,0.2); color: white; border: none;
             width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem;
             cursor: pointer; position: absolute; top: 50%; transform: translateY(-50%);
-            transition: background 0.2s;
+            transition: background 0.2s; z-index: 110;
         }
         .lightbox-nav:hover { background: rgba(255,255,255,0.4); }
         .nav-prev { left: -60px; }
         .nav-next { right: -60px; }
-        .close-lightbox { position: absolute; top: -40px; right: 0; color: white; font-size: 2rem; cursor: pointer; }
+        .close-lightbox { position: absolute; top: -40px; right: 0; color: white; font-size: 2.5rem; cursor: pointer; line-height: 1; }
 
-        @media screen and (max-width: 900px) {
+        @media screen and (max-width: 920px) {
             .nav-prev { left: 10px; }
             .nav-next { right: 10px; }
+            .close-lightbox { right: 10px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" class="container">
-        <h1 class="title">Notre Histoire</h1>
-        <p class="subtitle">Connexion à votre espace privé</p>
+    <div id="login-screen" class="login-container">
+        <h1 class="login-title">Notre Histoire</h1>
+        <p class="login-subtitle">Connexion à votre espace privé</p>
         
-        <form id="login-form">
+        <form id="login-form" class="login-form">
             <input type="email" id="email" placeholder="Adresse e-mail" required autocomplete="email">
             <input type="password" id="password" placeholder="Mot de passe" required autocomplete="current-password">
             <button type="submit" id="btn-login" class="btn-primary">Entrer</button>
-            <p id="login-error" class="error-msg hidden">Identifiants incorrects.</p>
+            <p id="login-error" class="error-msg hidden">Identifiants incorrects ou accès refusé.</p>
         </form>
     </div>
 
@@ -402,32 +249,7 @@
             <button id="btn-logout" class="btn-small">Se déconnecter</button>
         </div>
         
-        <div class="timeline" id="timeline-container">
-            
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-card">
-                    <div class="card-meta">📍 Calanques — 18 Mai 2026</div>
-                    <h3 class="card-title">Week-end dans le sud</h3>
-                    <p class="card-text">L'eau était gelée mais les paysages incroyables. On a marché pendant des heures pour trouver cette crique secrète. 
-C'était sûrement la meilleure décision du voyage, même si on a failli se perdre au retour !</p>
-                    
-                    <div class="card-gallery has-more" data-more="+3" onclick="openLightbox()">
-                        <img src="https://images.unsplash.com/photo-1543158022-7798363dbab8?auto=format&fit=crop&w=800&q=80" alt="Souvenir principal" loading="lazy">
-                    </div>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-card">
-                    <div class="card-meta">💭 Pensée — 15 Mai 2026</div>
-                    <h3 class="card-title">Juste un mot</h3>
-                    <p class="card-text">Je repensais à notre première rencontre ce matin. Le temps passe si vite.</p>
-                </div>
-            </div>
-
-        </div>
+        <div class="timeline" id="timeline-container"></div>
 
         <button class="fab" onclick="openAddModal()">+</button>
     </div>
@@ -437,23 +259,23 @@ C'était sûrement la meilleure décision du voyage, même si on a failli se per
             <h2 class="modal-title">Nouveau souvenir</h2>
             <form id="form-add">
                 <div class="form-group">
-                    <label>Date</label>
+                    <label>Date de l'événement</label>
                     <input type="date" id="input-date" required>
                 </div>
                 <div class="form-group">
-                    <label>Lieu (optionnel)</label>
-                    <input type="text" id="input-location" placeholder="Ex: Paris, France">
+                    <label>Lieu marquant (optionnel)</label>
+                    <input type="text" id="input-location" placeholder="Ex: Marseille, France">
                 </div>
                 <div class="form-group">
                     <label>Titre</label>
-                    <input type="text" id="input-title" placeholder="Un moment marquant..." required>
+                    <input type="text" id="input-title" placeholder="Donne un titre à ce moment..." required>
                 </div>
                 <div class="form-group">
-                    <label>Histoire</label>
-                    <textarea id="input-story" placeholder="Raconte cette anecdote..."></textarea>
+                    <label>Votre Histoire</label>
+                    <textarea id="input-story" placeholder="Écris vos souvenirs ici..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Photos</label>
+                    <label>Ajouter des photos</label>
                     <input type="file" id="input-photos" accept="image/*" multiple>
                 </div>
                 <div class="modal-actions">
@@ -468,17 +290,209 @@ C'était sûrement la meilleure décision du voyage, même si on a failli se per
         <div class="lightbox-content">
             <span class="close-lightbox" onclick="closeLightbox()">&times;</span>
             <button class="lightbox-nav nav-prev" onclick="prevPhoto()">&lt;</button>
-            <img src="" id="lightbox-img" class="lightbox-img" alt="Vue agrandie">
+            <img src="" id="lightbox-img" class="lightbox-img" alt="Vue HD">
             <button class="lightbox-nav nav-next" onclick="nextPhoto()">&gt;</button>
         </div>
     </div>
 
-    <script>
-        function openAddModal() { document.getElementById('modal-add').classList.remove('hidden'); }
-        function closeAddModal() { document.getElementById('modal-add').classList.add('hidden'); }
-        function openLightbox() { document.getElementById('modal-lightbox').classList.remove('hidden'); }
-        function closeLightbox() { document.getElementById('modal-lightbox').classList.add('hidden'); }
-    </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
+        // ⚠️ COLLE TA CONFIGURATION FIREBASE EXACTEMENT ICI
+        const firebaseConfig = {
+  apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
+  authDomain: "notre-journal-93ae5.firebaseapp.com",
+  projectId: "notre-journal-93ae5",
+  storageBucket: "notre-journal-93ae5.firebasestorage.app",
+  messagingSenderId: "949489326058",
+  appId: "1:949489326058:web:3b77c41d414ff011e14493"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // --- PROTECTION FAILLE XSS & INJECTIONS SCRIPT ---
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag]));
+        }
+
+        // --- FORMATAGE DATATION EN FRANÇAIS ---
+        function formatDate(dateString) {
+            if(!dateString) return '';
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString('fr-FR', options).toUpperCase();
+        }
+
+        // --- LISTENER D'AUTHENTIFICATION CONNECTÉ / DECONNECTÉ ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                loadMemories();
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('app-screen').classList.add('hidden');
+            }
+        });
+
+        // --- EXECUTION DE LA CONNEXION PRIVÉE ---
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login');
+            btn.disabled = true; btn.textContent = "Vérification...";
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
+            } catch (error) {
+                document.getElementById('login-error').classList.remove('hidden');
+                btn.disabled = false; btn.textContent = "Entrer";
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+        // --- INTERACTION ENGINE : CREATION DU MULTI-UPLOAD ET SOUVENIR ---
+        document.getElementById('form-add').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.querySelector('.btn-submit');
+            btn.disabled = true; btn.textContent = "Envoi en cours... ⏳";
+
+            try {
+                const date = document.getElementById('input-date').value;
+                const location = document.getElementById('input-location').value;
+                const title = document.getElementById('input-title').value;
+                const story = document.getElementById('input-story').value;
+                const files = document.getElementById('input-photos').files;
+
+                const imageUrls = [];
+                for (const file of files) {
+                    const fileRef = ref(storage, `photos/${Date.now()}_${file.name}`);
+                    await uploadBytes(fileRef, file);
+                    const url = await getDownloadURL(fileRef);
+                    imageUrls.push(url);
+                }
+
+                await addDoc(collection(db, "memories"), {
+                    date: date,
+                    location: location,
+                    title: title,
+                    story: story,
+                    images: imageUrls,
+                    timestamp: serverTimestamp()
+                });
+
+                document.getElementById('form-add').reset();
+                closeAddModal();
+                loadMemories();
+
+            } catch (error) {
+                console.error("Erreur d'upload:", error);
+                alert("Erreur réseau lors de la mise en ligne.");
+            } finally {
+                btn.disabled = false; btn.textContent = "Sauvegarder";
+            }
+        });
+
+        // --- ENGINE GENERATEUR DE FRISE CHRONOLOGIQUE INTELLIGENTE ---
+        async function loadMemories() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light);">Chargement de vos mémoires...</p>';
+
+            try {
+                const q = query(collection(db, "memories"), orderBy("date", "desc"));
+                const snapshot = await getDocs(q);
+                container.innerHTML = ''; 
+
+                if (snapshot.empty) {
+                    container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light); font-style:italic;">Votre journal est vierge. Cliquez sur le bouton + pour inscrire votre premier souvenir.</p>';
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const safeLocation = escapeHTML(data.location);
+                    const safeTitle = escapeHTML(data.title);
+                    const safeStory = escapeHTML(data.story);
+                    const displayDate = formatDate(data.date);
+
+                    let galleryHTML = '';
+                    if (data.images && data.images.length > 0) {
+                        const firstImage = data.images[0];
+                        const imagesArrayString = JSON.stringify(data.images).replace(/"/g, '&quot;');
+                        
+                        if (data.images.length === 1) {
+                            galleryHTML = `
+                                <div class="card-gallery" onclick="openLightbox(${imagesArrayString}, 0)">
+                                    <img src="${firstImage}" alt="Souvenir" loading="lazy">
+                                </div>`;
+                        } else {
+                            const extraCount = data.images.length - 1;
+                            galleryHTML = `
+                                <div class="card-gallery has-more" data-more="+${extraCount}" onclick="openLightbox(${imagesArrayString}, 0)">
+                                    <img src="${firstImage}" alt="Souvenir principal" loading="lazy">
+                                </div>`;
+                        }
+                    }
+
+                    const cardHTML = `
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-card">
+                                <div class="card-meta">
+                                    ${safeLocation ? `📍 ${safeLocation} — ` : ''}${displayDate}
+                                </div>
+                                <h3 class="card-title">${safeTitle}</h3>
+                                <p class="card-text">${safeStory}</p>
+                                ${galleryHTML}
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', cardHTML);
+                });
+            } catch(err) {
+                console.error(err);
+                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--error-color);">Erreur lors de la synchronisation en temps réel.</p>';
+            }
+        }
+
+        // --- EXPOSITION DES FONCTIONS ET DE LA LIGHTBOX AUX ACTIONS HTML ---
+        window.openAddModal = () => {
+            // Remplir automatiquement le champ date avec le jour actuel par défaut
+            document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('modal-add').classList.remove('hidden');
+        };
+        window.closeAddModal = () => document.getElementById('modal-add').classList.add('hidden');
+        
+        let currentPhotos = [];
+        let currentIndex = 0;
+
+        window.openLightbox = (photosArray, index) => {
+            currentPhotos = photosArray;
+            currentIndex = index;
+            document.getElementById('lightbox-img').src = currentPhotos[currentIndex];
+            document.getElementById('modal-lightbox').classList.remove('hidden');
+        };
+
+        window.closeLightbox = () => document.getElementById('modal-lightbox').classList.add('hidden');
+
+        window.prevPhoto = () => {
+            if(currentPhotos.length <= 1) return;
+            currentIndex = (currentIndex === 0) ? currentPhotos.length - 1 : currentIndex - 1;
+            document.getElementById('lightbox-img').src = currentPhotos[currentIndex];
+        };
+
+        window.nextPhoto = () => {
+            if(currentPhotos.length <= 1) return;
+            currentIndex = (currentIndex === currentPhotos.length - 1) ? 0 : currentIndex + 1;
+            document.getElementById('lightbox-img').src = currentPhotos[currentIndex];
+        };
+    </script>
 </body>
 </html>
