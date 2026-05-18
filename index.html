@@ -11,7 +11,7 @@
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
-        // 2. Colle ta configuration Firebase ici (celle de l'Étape 3)
+        // ⚠️ REMPLACE CECI PAR TA CONFIGURATION FIREBASE (Étape 3 précédente)
         const firebaseConfig = {
   apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
   authDomain: "notre-journal-93ae5.firebaseapp.com",
@@ -21,37 +21,155 @@
   appId: "1:949489326058:web:3b77c41d414ff011e14493"
 };
 
-        // 3. Initialisation
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        // On rend les outils disponibles globalement pour pouvoir coder facilement ensuite
-        window.auth = auth;
-        window.db = db;
-        window.storage = storage;
+        // --- LOGIQUE DE CONNEXION ---
 
-        console.log("🔥 Firebase est connecté !");
+        // 1. Écouter les changements d'état (Connecté ou non ?)
+        onAuthStateChanged(auth, (user) => {
+            const loginScreen = document.getElementById('login-screen');
+            const appScreen = document.getElementById('app-screen');
+            
+            if (user) {
+                // L'utilisateur est connecté, on affiche le journal
+                loginScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+            } else {
+                // Pas d'utilisateur, on affiche l'écran de connexion
+                loginScreen.classList.remove('hidden');
+                appScreen.classList.add('hidden');
+            }
+        });
+
+        // 2. Gérer la soumission du formulaire
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Empêche le rechargement de la page
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btn-login');
+            const errorMsg = document.getElementById('login-error');
+
+            btn.disabled = true;
+            btn.textContent = "Vérification...";
+            errorMsg.classList.add('hidden');
+
+            try {
+                // Tente la connexion Firebase
+                await signInWithEmailAndPassword(auth, email, password);
+                // Si ça réussit, le onAuthStateChanged au-dessus prendra le relais
+            } catch (error) {
+                // Si ça échoue (mauvais mot de passe, etc.)
+                console.error(error);
+                errorMsg.classList.remove('hidden');
+                btn.disabled = false;
+                btn.textContent = "Entrer";
+            }
+        });
+
+        // 3. Gérer la déconnexion
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth);
+        });
     </script>
 
     <style>
-        /* CSS de base pour tester */
-        body { font-family: system-ui, sans-serif; background: #fdfbf7; color: #333; margin: 0; padding: 2rem; }
-        .hidden { display: none; }
+        /* CSS UI/UX Mobile-First */
+        :root {
+            --bg-color: #fdfbf7;
+            --text-color: #2c3e50;
+            --accent-color: #d35400;
+            --border-color: #e0dcd3;
+        }
+
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-color); 
+            margin: 0; 
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .title { text-align: center; margin-bottom: 0.5rem; color: var(--text-color); }
+        .subtitle { text-align: center; color: #7f8c8d; margin-top: 0; margin-bottom: 2rem; font-size: 0.9rem;}
+
+        form { display: flex; flex-direction: column; gap: 1rem; }
+        
+        input {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--accent-color); }
+
+        .btn-primary {
+            background: var(--text-color);
+            color: #fff;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-top: 1rem;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .error-msg { color: #c0392b; font-size: 0.9rem; text-align: center; margin-top: 0.5rem; }
+        .hidden { display: none !important; }
+
+        /* Écran app de base */
+        #app-screen { width: 100%; max-width: 600px; padding: 2rem; box-sizing: border-box; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 2rem; }
+        .btn-small { background: transparent; border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <h1>Connexion</h1>
-        <p>Notre espace privé.</p>
-        </div>
+    <div id="login-screen" class="container">
+        <h1 class="title">Notre Histoire</h1>
+        <p class="subtitle">Connexion à votre espace privé</p>
+        
+        <form id="login-form">
+            <input type="email" id="email" placeholder="Adresse e-mail" required autocomplete="email">
+            <input type="password" id="password" placeholder="Mot de passe" required autocomplete="current-password">
+            <button type="submit" id="btn-login" class="btn-primary">Entrer</button>
+            <p id="login-error" class="error-msg hidden">Identifiants incorrects.</p>
+        </form>
+    </div>
 
     <div id="app-screen" class="hidden">
-        <h1>Notre Journal</h1>
-        <button id="btn-logout">Se déconnecter</button>
+        <div class="header">
+            <h2 style="margin:0;">Journal</h2>
+            <button id="btn-logout" class="btn-small">Se déconnecter</button>
         </div>
+        
+        <p style="text-align:center; color:#7f8c8d; font-style:italic;">La chronologie apparaîtra ici...</p>
+    </div>
 
 </body>
 </html>
