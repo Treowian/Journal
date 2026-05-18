@@ -77,13 +77,13 @@
     </script>
 
     <style>
-        /* CSS UI/UX Mobile-First */
+        /* 🎨 THEME VIOLET & UI */
         :root {
-            --bg-color: #fdfbf7;
-            --text-color: #2c3e50;
-            --text-light: #7f8c8d;
-            --accent-color: #d35400; /* Une couleur chaude, tu pourras changer */
-            --line-color: #e0dcd3;
+            --bg-color: #faf8fc; /* Un blanc très légèrement teinté de violet */
+            --text-color: #31213e; /* Violet très sombre presque noir */
+            --text-light: #847395; /* Violet grisé pour les dates */
+            --accent-color: #8e44ad; /* Le violet principal (Améthyste) */
+            --line-color: #dfd5e8; /* La ligne temporelle */
             --card-bg: #ffffff;
         }
 
@@ -91,106 +91,125 @@
             font-family: system-ui, -apple-system, sans-serif; 
             background: var(--bg-color); 
             color: var(--text-color); 
-            margin: 0; 
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
             min-height: 100vh;
         }
 
-        /* Garde le style de ton login ici... */
+        /* Styles de base... */
         .container { width: 100%; max-width: 400px; padding: 2rem; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; flex-grow: 1; }
         .hidden { display: none !important; }
 
         /* --- ÉCRAN PRINCIPAL --- */
-        #app-screen { width: 100%; max-width: 1000px; padding: 1rem; box-sizing: border-box; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 2rem; }
-        .btn-small { background: transparent; border: 1px solid var(--text-light); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
+        #app-screen { width: 100%; max-width: 900px; padding: 1rem; box-sizing: border-box; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--line-color);}
+        .btn-small { background: transparent; border: 1px solid var(--text-light); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
         
-        /* --- CHRONOLOGIE (MOBILE FIRST) --- */
+        /* --- CHRONOLOGIE CENTRÉE (Design "Perle sur un fil" pour Mobile) --- */
         .timeline {
             position: relative;
-            max-width: 100%;
-            margin: 0 auto;
-        }
-
-        /* La ligne verticale (À gauche sur mobile) */
-        .timeline::after {
-            content: '';
-            position: absolute;
-            width: 2px;
-            background-color: var(--line-color);
-            top: 0;
-            bottom: 0;
-            left: 20px; /* Positionnée à gauche */
-            margin-left: -1px;
-        }
-
-        /* Le conteneur d'un souvenir */
-        .timeline-item {
-            padding: 10px 0 30px 50px; /* Espace à gauche pour la ligne */
-            position: relative;
-            background-color: inherit;
             width: 100%;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        /* La ligne verticale au centre parfait */
+        .timeline::after {
+            content: ''; position: absolute;
+            width: 2px; background-color: var(--line-color);
+            top: 0; bottom: 0; left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Conteneur d'un souvenir (Mobile) */
+        .timeline-item {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 3rem;
+            z-index: 2; /* Passe au-dessus de la ligne */
+        }
+
+        /* Le point central */
+        .timeline-dot {
+            width: 16px; height: 16px;
+            background-color: var(--accent-color);
+            border: 4px solid var(--bg-color);
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            z-index: 3;
+        }
+
+        /* La carte (Mobile) */
+        .timeline-card {
+            width: 90%; /* Prend presque tout l'écran sur mobile */
+            padding: 1.5rem;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); /* Ombre violette légère */
             box-sizing: border-box;
         }
 
-        /* Le petit point sur la ligne */
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            right: auto;
-            left: 12px; /* Positionné sur la ligne de gauche */
-            background-color: var(--accent-color);
-            border: 4px solid var(--bg-color);
-            top: 15px;
-            border-radius: 50%;
-            z-index: 1;
+        /* --- GALERIE PHOTO INTELLIGENTE --- */
+        .card-gallery {
+            display: grid;
+            gap: 4px; /* Espace entre les photos */
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        /* 1 photo */
+        .card-gallery[data-count="1"] { grid-template-columns: 1fr; }
+        /* 2 photos */
+        .card-gallery[data-count="2"] { grid-template-columns: 1fr 1fr; }
+        /* 3 photos (La première est grande, les deux autres en dessous) */
+        .card-gallery[data-count="3"] { grid-template-columns: 1fr 1fr; }
+        .card-gallery[data-count="3"] img:first-child { grid-column: 1 / -1; }
+
+        .card-gallery img {
+            width: 100%;
+            height: 100%;
+            max-height: 400px;
+            object-fit: cover; /* Recadre proprement sans déformer (portrait ou paysage) */
+            background-color: #f0f0f0;
         }
 
-        /* La carte en elle-même */
-        .timeline-card {
-            padding: 1.5rem;
-            background-color: var(--card-bg);
-            position: relative;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.02);
-        }
-
-        /* Contenu de la carte */
-        .card-meta { font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;}
+        /* Contenu texte */
+        .card-meta { font-size: 0.85rem; color: var(--accent-color); margin-bottom: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
         .card-title { margin: 0 0 0.5rem 0; font-size: 1.3rem; }
         .card-text { margin: 0; line-height: 1.6; color: #4a5568; }
-        .card-image { width: 100%; border-radius: 8px; margin-bottom: 1rem; object-fit: cover; max-height: 300px; background-color: #f0f0f0;}
 
-        /* --- ADAPTATION PC (Écrans > 768px) --- */
+        /* --- ADAPTATION PC (Cartes alternées) --- */
         @media screen and (min-width: 768px) {
-            .timeline::after {
-                left: 50%; /* La ligne passe au centre */
-            }
-            
             .timeline-item {
                 width: 50%;
-                padding: 10px 40px 30px 40px;
+                display: block; /* On retire le flex column du mobile */
+                margin-bottom: 0;
             }
             
-            /* Les éléments pairs vont à droite */
-            .timeline-item:nth-child(even) {
-                left: 50%;
-            }
-            
-            /* Les éléments impairs restent à gauche */
-            .timeline-item:nth-child(odd) {
-                left: 0;
-            }
+            /* Pairs à droite, Impairs à gauche */
+            .timeline-item:nth-child(even) { left: 50%; padding: 2rem 0 2rem 3rem; }
+            .timeline-item:nth-child(odd) { left: 0; padding: 2rem 3rem 2rem 0; text-align: right; }
 
-            /* Replacer les points au centre */
-            .timeline-item:nth-child(odd)::after { left: auto; right: -10px; }
-            .timeline-item:nth-child(even)::after { left: -10px; }
+            /* On cache le dot mobile et on le recrée sur le côté pour le PC */
+            .timeline-dot { display: none; }
+            
+            .timeline-item::after {
+                content: ''; position: absolute;
+                width: 16px; height: 16px;
+                background-color: var(--accent-color);
+                border: 4px solid var(--bg-color);
+                border-radius: 50%;
+                top: 50%; transform: translateY(-50%);
+                z-index: 3;
+            }
+            
+            .timeline-item:nth-child(odd)::after { right: -12px; }
+            .timeline-item:nth-child(even)::after { left: -12px; }
+
+            .timeline-card { width: 100%; text-align: left; }
         }
     </style>
 </head>
@@ -210,33 +229,48 @@
 
     <div id="app-screen" class="hidden">
         <div class="header">
-            <h2 style="margin:0;">Notre Journal</h2>
+            <h2 style="margin:0; color: var(--accent-color);">Notre Journal</h2>
             <button id="btn-logout" class="btn-small">Se déconnecter</button>
         </div>
         
-        <div class="timeline">
+        <div class="timeline" id="timeline-container">
+            
             <div class="timeline-item">
+                <div class="timeline-dot"></div>
                 <div class="timeline-card">
-                    <div class="card-meta">📍 Vieux-Port, Marseille — 18 Mai 2026</div>
-                    <img src="https://images.unsplash.com/photo-1543158022-7798363dbab8?auto=format&fit=crop&w=600&q=80" alt="Souvenir" class="card-image">
-                    <h3 class="card-title">Première glace de l'été</h3>
-                    <p class="card-text">Une journée magnifique passée à se promener. On a failli rater le bateau, mais la vue en valait la peine.</p>
+                    <div class="card-meta">📍 Calanques — 18 Mai 2026</div>
+                    
+                    <div class="card-gallery" data-count="3">
+                        <img src="https://images.unsplash.com/photo-1543158022-7798363dbab8?auto=format&fit=crop&w=800&q=80" alt="Paysage">
+                        <img src="https://images.unsplash.com/photo-1516733968668-dbdce39c4651?auto=format&fit=crop&w=400&q=80" alt="Portrait">
+                        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80" alt="Détail">
+                    </div>
+
+                    <h3 class="card-title">Week-end dans le sud</h3>
+                    <p class="card-text">L'eau était gelée mais les paysages incroyables. On a marché pendant des heures pour trouver cette crique secrète.</p>
                 </div>
             </div>
 
             <div class="timeline-item">
+                <div class="timeline-dot"></div>
                 <div class="timeline-card">
-                    <div class="card-meta">🏠 À la maison — 15 Mai 2026</div>
-                    <h3 class="card-title">Soirée cinéma improvisée</h3>
-                    <p class="card-text">On a finalement regardé ce film dont tu me parlais depuis des mois. J'avoue que tu avais raison, c'était un chef-d'œuvre !</p>
+                    <div class="card-meta">🏠 Chez nous — 10 Mai 2026</div>
+                    
+                    <div class="card-gallery" data-count="1">
+                        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80" alt="Souvenir">
+                    </div>
+
+                    <h3 class="card-title">Soirée jeux de société</h3>
+                    <p class="card-text">Tu as encore gagné, je commence à soupçonner de la triche. Mais la pizza a compensé ma défaite.</p>
                 </div>
             </div>
-            
+
             <div class="timeline-item">
+                <div class="timeline-dot"></div>
                 <div class="timeline-card">
-                    <div class="card-meta">🌳 Parc Borély — 10 Mai 2026</div>
-                    <h3 class="card-title">Pique-nique sous les arbres</h3>
-                    <p class="card-text">Le vent s'est levé mais on a quand même réussi à finir notre repas avant l'orage.</p>
+                    <div class="card-meta">💭 Pensée — 5 Mai 2026</div>
+                    <h3 class="card-title">Juste un mot</h3>
+                    <p class="card-text">Je repensais à notre première rencontre ce matin. Le temps passe si vite.</p>
                 </div>
             </div>
         </div>
