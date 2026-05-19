@@ -1,0 +1,15 @@
+{
+  "name": "Notre Histoire",
+  "short_name": "Journal",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#faf8fc",
+  "theme_color": "#8e44ad",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
