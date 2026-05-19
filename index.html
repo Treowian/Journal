@@ -55,9 +55,6 @@
         .btn-icon-top:hover { background: rgba(0,0,0,0.05); color: var(--accent-color); }
         .btn-logout:hover { color: var(--error-color); }
 
-        /* ==========================================================================
-           🛠️ ONGLETS FIXES (STICKY) & CONTRÔLES
-           ========================================================================== */
         .view-tabs { 
             display: flex; background: var(--line-color); border-radius: 20px; padding: 4px; 
             width: 100%; max-width: 600px; margin: 0 auto 1.5rem auto;
@@ -68,32 +65,22 @@
         
         .top-controls { width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 2rem; }
         
-        /* Bouton pour afficher/masquer les filtres */
         .btn-toggle-filters { background: transparent; border: 1px solid var(--line-color); color: var(--text-color); padding: 0.6rem 1.5rem; border-radius: 20px; font-size: 0.9rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s;}
         .btn-toggle-filters:hover { background: var(--line-color); }
 
         .filters-container { display: flex; flex-wrap: wrap; gap: 0.5rem; width: 100%; margin-top: 0.5rem;}
-        
-        .filters-container input, .select-selected, .btn-sort {
-            font-family: inherit; font-size: 0.9rem; box-sizing: border-box; height: 42px; 
-            border: 1px solid var(--line-color); border-radius: 8px; outline: none; background: white;
-        }
-        
+        .filters-container input, .select-selected, .btn-sort { font-family: inherit; font-size: 0.9rem; box-sizing: border-box; height: 42px; border: 1px solid var(--line-color); border-radius: 8px; outline: none; background: white; }
         .filters-container input { flex: 1 1 250px; padding: 0 1rem; color: var(--text-color); }
         .filters-container input:focus { border-color: var(--accent-color); }
-        
         .custom-select { position: relative; width: 100%; user-select: none; }
-        .filters-container .custom-select { flex: 0 1 180px; } /* Largeur bridée uniquement dans la barre de filtre */
-
+        .filters-container .custom-select { flex: 0 1 180px; }
         .select-selected { padding: 0 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .select-selected.active { border-color: var(--accent-color); }
-        
         .select-items { position: absolute; background-color: white; top: 100%; left: 0; right: 0; z-index: 999; border: 1px solid var(--line-color); border-radius: 8px; margin-top: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-height: 250px; overflow-y: auto; display: none; }
         .select-items.select-show { display: block; }
         .select-item { padding: 0.8rem 1rem; cursor: pointer; font-size: 0.9rem; border-bottom: 1px solid var(--line-color); color: var(--text-color); }
         .select-item:last-child { border-bottom: none; }
         .select-item:hover { background-color: var(--bg-color); color: var(--accent-color); font-weight: bold; }
-
         .btn-sort { flex: 0 1 auto; padding: 0 1rem; cursor: pointer; font-weight: normal; color: var(--text-color); transition: background 0.2s; white-space: nowrap;}
         .btn-sort:hover { background: var(--bg-color); }
 
@@ -103,7 +90,6 @@
             .btn-sort { flex: 1 1 100%; }
         }
 
-        /* VUES & CARTES */
         .ephemeride-banner { background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 2rem; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); display: flex; align-items: center; gap: 1rem; box-sizing: border-box; cursor: pointer;}
         .ephemeride-icon { font-size: 2rem; }
         .ephemeride-content h3 { margin: 0 0 0.2rem 0; font-size: 1rem; opacity: 0.9;}
@@ -111,15 +97,14 @@
 
         #map-container { width: 100%; height: 60vh; max-height: 600px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 1; border: 2px solid white;}
         
-        .global-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; width: 100%; padding-bottom: 3rem;}
-        .gallery-item { position: relative; width: 100%; aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-        .gallery-item:hover img { transform: scale(1.05); }
-        .gallery-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(49, 33, 62, 0.9)); color: white; padding: 10px; opacity: 0; transition: opacity 0.3s; display: flex; flex-direction: column; justify-content: flex-end;}
-        .gallery-item:hover .gallery-overlay { opacity: 1; }
-        .gallery-overlay span { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; color: #e0dcd3;}
-        .gallery-overlay strong { font-size: 0.9rem; line-height: 1.2; }
-        @media screen and (max-width: 600px) { .global-gallery { grid-template-columns: repeat(2, 1fr); } .gallery-overlay { opacity: 1; background: linear-gradient(transparent, rgba(49, 33, 62, 0.7));} }
+        /* 🆕 REFONTE DE LA GALERIE PAR ALBUMS */
+        #gallery-container { width: 100%; padding-bottom: 3rem; }
+        .album-section { margin-bottom: 2.5rem; width: 100%; background: var(--card-bg); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(142, 68, 173, 0.05); box-sizing: border-box;}
+        .album-title { font-size: 1.2rem; font-weight: bold; color: var(--text-color); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--line-color); padding-bottom: 0.5rem;}
+        .album-date { font-size: 0.85rem; color: var(--text-light); font-weight: normal; }
+        .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+        .album-grid img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 6px; cursor: pointer; transition: transform 0.2s; }
+        .album-grid img:hover { transform: scale(1.05); }
 
         .timeline { position: relative; width: 100%; margin: 0 auto; padding: 0 0 2rem 0; box-sizing: border-box;}
         .timeline::after { content: ''; position: absolute; width: 2px; background-color: var(--line-color); top: 0; bottom: 0; left: 50%; transform: translateX(-50%); }
@@ -141,10 +126,20 @@
         .btn-action:hover { opacity: 1; color: var(--accent-color);}
         .card-text { margin: 0 0 1.5rem 0; line-height: 1.6; color: #4a5568; white-space: pre-wrap; word-break: break-word; font-size: 1rem;}
 
-        .card-gallery { position: relative; width: 100%; height: 250px; border-radius: 8px; overflow: hidden; background-color: #dfd5e8; cursor: pointer; transition: transform 0.2s ease; margin-top: 1rem;}
-        .card-gallery:hover { transform: scale(0.99); }
-        .card-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .card-gallery.has-more::after { content: "+" attr(data-more) " photos"; position: absolute; bottom: 12px; left: 12px; background: rgba(49, 33, 62, 0.8); color: white; font-size: 0.8rem; font-weight: bold; padding: 6px 14px; border-radius: 20px; backdrop-filter: blur(4px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
+        /* 🆕 REFONTE DE LA GRILLE SOCIALE (TIMELINE) */
+        .timeline-gallery { display: grid; gap: 4px; border-radius: 8px; overflow: hidden; margin-top: 1rem; background: var(--line-color);}
+        .timeline-gallery.grid-1 { grid-template-columns: 1fr; }
+        .timeline-gallery.grid-2 { grid-template-columns: 1fr 1fr; }
+        .timeline-gallery.grid-3 { grid-template-columns: 1fr 1fr; }
+        .timeline-gallery.grid-3 > div:first-child { grid-column: span 2; aspect-ratio: 16/9;}
+        .timeline-gallery.grid-4 { grid-template-columns: 1fr 1fr; }
+        
+        .tg-item { position: relative; width: 100%; aspect-ratio: 1/1; cursor: pointer; overflow: hidden;}
+        .timeline-gallery.grid-1 .tg-item { aspect-ratio: 16/9; }
+        
+        .tg-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s;}
+        .tg-item:hover img { transform: scale(1.03); }
+        .tg-overlay { position: absolute; inset: 0; background: rgba(49, 33, 62, 0.6); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; backdrop-filter: blur(2px);}
 
         @media screen and (min-width: 768px) {
             .timeline-item { width: 50%; display: flex; flex-direction: column; margin-bottom: 0; box-sizing: border-box;}
@@ -157,11 +152,9 @@
             .timeline-item:nth-child(even)::after { left: 0; transform: translate(-50%, -50%); }
         }
 
-        /* FAB & MODALES */
         .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-color); color: white; border: none; font-size: 2.3rem; font-weight: 300; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4); cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
         .fab:hover { transform: scale(1.1); }
         
-        /* 🆕 BOUTON REMONTER */
         .fab-up { position: fixed; bottom: 105px; right: 37px; width: 45px; height: 45px; border-radius: 50%; background-color: var(--card-bg); color: var(--text-light); border: 1px solid var(--line-color); font-size: 1.5rem; cursor: pointer; z-index: 49; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; transition: opacity 0.3s, transform 0.2s; opacity: 0; pointer-events: none; }
         .fab-up.visible { opacity: 1; pointer-events: auto; }
         .fab-up:hover { color: var(--accent-color); border-color: var(--accent-color); transform: translateY(-3px);}
@@ -282,7 +275,7 @@
         </div>
         <div id="scroll-sentinel"></div>
 
-        <div id="gallery-container" class="global-gallery hidden"></div>
+        <div id="gallery-container" class="hidden"></div>
         <div id="map-container" class="hidden"></div>
 
         <button class="fab-up" id="btn-scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
@@ -314,7 +307,7 @@
             <button type="button" class="btn-outline" onclick="exportJSONBackup()">💾 Exporter le Backup (.json)</button>
             <input type="file" id="input-restore-json" accept=".json" style="display:none;" onchange="importJSONBackup(event)">
             <button type="button" class="btn-outline" onclick="document.getElementById('input-restore-json').click()">🔄 Restaurer un Backup</button>
-            <button type="button" class="btn-outline" onclick="exportPDF()" style="margin-top: 1rem; border-color: var(--accent-color); color: var(--accent-color);">📄 Générer un PDF</button>
+            <button type="button" class="btn-outline" onclick="exportPDF()" style="margin-top: 1rem; border-color: var(--accent-color); color: var(--accent-color);">📄 Générer un PDF lisible</button>
         </div>
     </div>
 
@@ -434,7 +427,6 @@
         
         const sessionLastSeen = parseInt(localStorage.getItem('mm_last_seen') || '0');
 
-        // 🆕 LISTENER POUR LE BOUTON RETOUR EN HAUT
         window.addEventListener('scroll', () => {
             const btnUp = document.getElementById('btn-scroll-top');
             if (window.scrollY > 400) {
@@ -513,6 +505,7 @@
             document.getElementById('custom-year-selected').classList.remove('active');
             window.renderLimit = 10; 
             window.renderMemories();
+            if(currentView === 'gallery') window.renderGallery();
         };
         
         window.selectCatFilter = (val, label) => {
@@ -522,6 +515,7 @@
             document.getElementById('custom-cat-filter-selected').classList.remove('active');
             window.renderLimit = 10; 
             window.renderMemories();
+            if(currentView === 'gallery') window.renderGallery();
         };
 
         window.selectCat = (inputId, val, selectedId, itemsId) => {
@@ -534,6 +528,7 @@
         window.triggerSearch = () => {
             window.renderLimit = 10;
             window.renderMemories();
+            if(currentView === 'gallery') window.renderGallery();
         };
 
         window.toggleSortOrder = () => {
@@ -547,6 +542,7 @@
             }
             window.renderLimit = 10;
             window.renderMemories();
+            if(currentView === 'gallery') window.renderGallery();
         };
 
         document.addEventListener('click', function(e) {
@@ -913,17 +909,31 @@
                 const isNew = data.timestamp && data.timestamp.toMillis() > sessionLastSeen && data.author !== getSavedName();
                 const badgeNew = isNew ? `<span class="badge-new">NOUVEAU ✨</span>` : '';
 
+                // 🆕 GRILLE SOCIALE (Jusqu'à 4 photos visibles)
                 let galleryHTML = '';
                 if (data.images && data.images.length > 0) {
-                    const firstImage = data.images[0];
                     const imagesArrayString = JSON.stringify(data.images).replace(/"/g, '&quot;');
+                    const len = data.images.length;
                     
-                    if (data.images.length === 1) {
-                        galleryHTML = `<div class="card-gallery" onclick="openLightbox(${imagesArrayString}, 0)"><img src="${firstImage}" loading="lazy"></div>`;
-                    } else {
-                        const extraCount = data.images.length - 1;
-                        galleryHTML = `<div class="card-gallery has-more" data-more="${extraCount}" onclick="openLightbox(${imagesArrayString}, 0)"><img src="${firstImage}" loading="lazy"></div>`;
+                    let gridClass = len === 1 ? 'grid-1' : len === 2 ? 'grid-2' : len === 3 ? 'grid-3' : 'grid-4';
+                    
+                    galleryHTML = `<div class="timeline-gallery ${gridClass}">`;
+                    
+                    for (let i = 0; i < Math.min(len, 4); i++) {
+                        if (i === 3 && len > 4) {
+                            galleryHTML += `
+                            <div class="tg-item" onclick="openLightbox(${imagesArrayString}, ${i})">
+                                <img src="${data.images[i]}" loading="lazy">
+                                <div class="tg-overlay">+${len - 4}</div>
+                            </div>`;
+                        } else {
+                            galleryHTML += `
+                            <div class="tg-item" onclick="openLightbox(${imagesArrayString}, ${i})">
+                                <img src="${data.images[i]}" loading="lazy">
+                            </div>`;
+                        }
                     }
+                    galleryHTML += `</div>`;
                 }
 
                 container.insertAdjacentHTML('beforeend', `
@@ -969,35 +979,51 @@
             scrollObserver.observe(document.getElementById('scroll-sentinel'));
         });
 
+        // 🆕 VUE GALERIE PAR ALBUMS
         window.renderGallery = () => {
             const container = document.getElementById('gallery-container');
             container.innerHTML = '';
             
-            let allPhotosFlat = [];
-            window.allMemories.forEach(m => {
-                if(m.images) { m.images.forEach(url => { allPhotosFlat.push({ url, title: m.title, date: m.date, id: m.id }); }); }
+            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+            const yearQuery = window.currentYearFilter;
+            const catQuery = window.currentCatFilter;
+
+            let filteredMemories = window.allMemories.filter(m => {
+                const matchSearch = (m.title||"").toLowerCase().includes(searchQuery) || (m.location||"").toLowerCase().includes(searchQuery) || (m.story||"").toLowerCase().includes(searchQuery);
+                const matchYear = yearQuery === 'all' || (m.date && m.date.startsWith(yearQuery));
+                const matchCat = catQuery === 'all' || (m.category === catQuery) || (!m.category && catQuery === '☕ Quotidien');
+                return matchSearch && matchYear && matchCat;
             });
 
-            if(allPhotosFlat.length === 0) {
-                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light); font-style:italic;">Aucune photo dans la galerie.</p>';
-                return;
+            filteredMemories.sort((a, b) => {
+                let dateA = new Date(a.date).getTime();
+                let dateB = new Date(b.date).getTime();
+                return window.currentSortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+            });
+
+            let hasPhotos = false;
+
+            filteredMemories.forEach(m => {
+                if(m.images && m.images.length > 0) {
+                    hasPhotos = true;
+                    const imagesArrayString = JSON.stringify(m.images).replace(/"/g, '&quot;');
+                    
+                    let html = `<div class="album-section">
+                        <div class="album-title">${escapeHTML(m.title)} <span class="album-date">${formatDate(m.date)}</span></div>
+                        <div class="album-grid">`;
+                    
+                    m.images.forEach((url, index) => {
+                        html += `<img src="${url}" loading="lazy" onclick="openLightbox(${imagesArrayString}, ${index})">`;
+                    });
+                    
+                    html += `</div></div>`;
+                    container.insertAdjacentHTML('beforeend', html);
+                }
+            });
+
+            if(!hasPhotos) {
+                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--text-light); font-style:italic;">Aucune photo trouvée avec ces filtres.</p>';
             }
-
-            const urlOnlyArray = allPhotosFlat.map(p => p.url);
-            const urlArrayString = JSON.stringify(urlOnlyArray).replace(/"/g, '&quot;');
-
-            allPhotosFlat.forEach((photo, index) => {
-                const dateShort = formatDate(photo.date);
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="gallery-item" onclick="openLightbox(${urlArrayString}, ${index})">
-                        <img src="${photo.url}" loading="lazy">
-                        <div class="gallery-overlay">
-                            <span>${dateShort}</span>
-                            <strong>${escapeHTML(photo.title)}</strong>
-                        </div>
-                    </div>
-                `);
-            });
         };
 
         window.renderMap = () => {
@@ -1031,14 +1057,11 @@
             document.getElementById('timeline-container').classList.add('hidden');
             document.getElementById('gallery-container').classList.add('hidden');
             document.getElementById('map-container').classList.add('hidden');
-            
-            // On cache aussi complètement le panneau de contrôle si on quitte le journal
-            document.getElementById('top-controls').classList.add('hidden'); 
             document.getElementById('ephemeride-banner').classList.add('hidden'); 
 
             if (view === 'list') {
                 document.getElementById('timeline-container').classList.remove('hidden');
-                document.getElementById('top-controls').classList.remove('hidden'); // On le réaffiche !
+                document.getElementById('top-controls').classList.remove('hidden'); 
                 checkOnThisDay(); 
                 window.renderLimit = 10; 
                 renderMemories();
@@ -1122,24 +1145,33 @@
         window.prevPhoto = () => { if(currentPhotos.length <= 1) return; currentIndex = (currentIndex === 0) ? currentPhotos.length - 1 : currentIndex - 1; document.getElementById('lightbox-img').src = currentPhotos[currentIndex]; };
         window.nextPhoto = () => { if(currentPhotos.length <= 1) return; currentIndex = (currentIndex === currentPhotos.length - 1) ? 0 : currentIndex + 1; document.getElementById('lightbox-img').src = currentPhotos[currentIndex]; };
 
-        document.getElementById('modal-lightbox').addEventListener('keydown', (e) => {
+        // 🆕 GESTION DU SWIPE SUR MOBILE POUR LA LIGHTBOX
+        let touchstartX = 0;
+        let touchendX = 0;
+        const lightboxElement = document.getElementById('modal-lightbox');
+        
+        lightboxElement.addEventListener('touchstart', e => { 
+            touchstartX = e.changedTouches[0].screenX; 
+        }, {passive: true});
+        
+        lightboxElement.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            if (touchendX < touchstartX - 50) window.nextPhoto(); // Swipe gauche
+            if (touchendX > touchstartX + 50) window.prevPhoto(); // Swipe droite
+        }, {passive: true});
+
+        // Contrôle au clavier
+        lightboxElement.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight') window.nextPhoto();
             else if (e.key === 'ArrowLeft') window.prevPhoto();
             else if (e.key === 'Escape') window.closeLightbox();
         });
 
-        // ==========================================
-        //  INSTALLATION DU SERVICE WORKER (MODE HORS-LIGNE)
-        // ==========================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then((registration) => {
-                        console.log('✅ Service Worker activé ! Portée :', registration.scope);
-                    })
-                    .catch((error) => {
-                        console.error('❌ Échec du Service Worker :', error);
-                    });
+                    .then((registration) => console.log('✅ Service Worker activé ! Portée :', registration.scope))
+                    .catch((error) => console.error('❌ Échec du Service Worker :', error));
             });
         }
     </script>
