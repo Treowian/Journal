@@ -178,6 +178,7 @@
             <input type="password" id="password" placeholder="Mot de passe" required autocomplete="current-password">
             <button type="submit" id="btn-login" class="btn-primary">Entrer</button>
             <p id="login-error" class="error-msg hidden">Identifiants incorrects.</p>
+            <button type="button" id="btn-reset-pwd" style="background:none; border:none; color:var(--accent-color); cursor:pointer; text-decoration:underline; font-size:0.9rem; margin-top:0.5rem;">Mot de passe oublié ?</button>
         </form>
     </div>
 
@@ -342,6 +343,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, deleteDoc, updateDoc, setDoc, onSnapshot, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
         const firebaseConfig = {
@@ -593,6 +595,21 @@
             btn.disabled = true; btn.textContent = "Vérification...";
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
             catch (error) { document.getElementById('login-error').classList.remove('hidden'); btn.disabled = false; btn.textContent = "Entrer"; }
+        });
+
+        // 🆕 GESTION DU MOT DE PASSE OUBLIÉ
+        document.getElementById('btn-reset-pwd').addEventListener('click', async () => {
+            const emailVal = document.getElementById('email').value;
+            if(!emailVal) {
+                alert("Veuillez d'abord taper votre adresse e-mail dans la case au-dessus, puis cliquez sur 'Mot de passe oublié ?'.");
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, emailVal);
+                alert("Un e-mail de réinitialisation vient d'être envoyé à " + emailVal);
+            } catch (error) {
+                alert("Erreur : Vérifiez que cette adresse e-mail est bien enregistrée.");
+            }
         });
         
         document.getElementById('btn-logout').addEventListener('click', () => {
