@@ -14,9 +14,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        /* ==========================================================================
-           🎨 SYSTEME DE DESIGN & VARIABLES
-           ========================================================================== */
         :root {
             --bg-color: #faf8fc;
             --text-color: #31213e;
@@ -34,11 +31,9 @@
         }
         .hidden { display: none !important; }
 
-        /* SPINNER DE CHARGEMENT */
         .spinner { width: 40px; height: 40px; border: 4px solid var(--line-color); border-top: 4px solid var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 2rem auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* CONNEXION */
         .login-container { width: 100%; max-width: 400px; padding: 2rem; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; flex-grow: 1; }
         .login-title { text-align: center; margin-bottom: 0.5rem; color: var(--text-color); font-size: 2rem; }
         .login-subtitle { text-align: center; color: var(--text-light); margin-top: 0; margin-bottom: 2rem; font-size: 0.9rem;}
@@ -49,7 +44,6 @@
         .btn-primary:hover:not(:disabled) { opacity: 0.9; }
         .error-msg { color: var(--error-color); font-size: 0.9rem; text-align: center; margin-top: 0.5rem; }
 
-        /* HEADER ÉPURÉ */
         #app-screen { width: 100%; max-width: 900px; padding: 1rem; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;}
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--line-color);}
         
@@ -61,7 +55,6 @@
         .btn-icon-top:hover { background: rgba(0,0,0,0.05); color: var(--accent-color); }
         .btn-logout:hover { color: var(--error-color); }
 
-        /* TABS & RECHERCHE */
         .top-controls { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
         .view-tabs { display: flex; background: var(--line-color); border-radius: 20px; padding: 4px; }
         .view-tab { flex: 1; text-align: center; padding: 0.6rem; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 0.9rem; color: var(--text-light); transition: all 0.2s; }
@@ -75,23 +68,21 @@
             .search-box input { flex: 1; width: 100%; box-sizing: border-box; }
         }
 
-        /* CUSTOM DROPDOWN */
-        .custom-select { position: relative; flex: 1; user-select: none; width: 100%; box-sizing: border-box;}
+        /* CUSTOM DROPDOWNS (Filtres et Modales) */
+        .custom-select { position: relative; width: 100%; box-sizing: border-box; user-select: none; }
         .select-selected { padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); }
         .select-selected.active { border-color: var(--accent-color); }
-        .select-items { position: absolute; background-color: white; top: 100%; left: 0; right: 0; z-index: 99; border: 1px solid var(--line-color); border-radius: 8px; margin-top: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-height: 250px; overflow-y: auto; display: none; }
+        .select-items { position: absolute; background-color: white; top: 100%; left: 0; right: 0; z-index: 999; border: 1px solid var(--line-color); border-radius: 8px; margin-top: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; display: none; }
         .select-items.select-show { display: block; }
         .select-item { padding: 0.8rem; cursor: pointer; font-size: 0.9rem; border-bottom: 1px solid var(--line-color); color: var(--text-color); }
         .select-item:last-child { border-bottom: none; }
         .select-item:hover { background-color: var(--bg-color); color: var(--accent-color); font-weight: bold; }
 
-        /* EPHÉMÉRIDE (CE JOUR LÀ) */
         .ephemeride-banner { background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 2rem; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); display: flex; align-items: center; gap: 1rem; box-sizing: border-box; cursor: pointer;}
         .ephemeride-icon { font-size: 2rem; }
         .ephemeride-content h3 { margin: 0 0 0.2rem 0; font-size: 1rem; opacity: 0.9;}
         .ephemeride-content p { margin: 0; font-weight: bold; font-size: 1.1rem; }
 
-        /* VUES : CARTE & GALERIE */
         #map-container { width: 100%; height: 60vh; max-height: 600px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 1; border: 2px solid white;}
         
         .global-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; width: 100%; padding-bottom: 3rem;}
@@ -104,9 +95,6 @@
         .gallery-overlay strong { font-size: 0.9rem; line-height: 1.2; }
         @media screen and (max-width: 600px) { .global-gallery { grid-template-columns: repeat(2, 1fr); } .gallery-overlay { opacity: 1; background: linear-gradient(transparent, rgba(49, 33, 62, 0.7));} }
 
-        /* ==========================================================================
-           🛠️ REFONTE UI : FRISE CHRONOLOGIQUE ET CARTES (Aérées et lisibles)
-           ========================================================================== */
         .timeline { position: relative; width: 100%; margin: 0 auto; padding: 0 0 2rem 0; box-sizing: border-box;}
         .timeline::after { content: ''; position: absolute; width: 2px; background-color: var(--line-color); top: 0; bottom: 0; left: 50%; transform: translateX(-50%); }
         .timeline-item { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 3rem; z-index: 2; box-sizing: border-box;}
@@ -114,34 +102,24 @@
         
         .timeline-card { width: 90%; padding: 1.5rem; background-color: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); box-sizing: border-box; border: 2px solid transparent; transition: border-color 0.3s; overflow: hidden; }
         
-        /* HEADER EN BLOCS DISTINCTS */
         .card-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
-        
         .card-badge-category { background: rgba(142, 68, 173, 0.1); color: var(--accent-color); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px; }
         .card-author { font-size: 0.8rem; color: var(--text-light); }
-
         .card-title { margin: 0 0 0.5rem 0; font-size: 1.4rem; word-break: break-word; color: var(--text-color); }
-        
-        /* Ligne Date / Lieu épurée */
         .card-meta-line { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.5rem; font-weight: 500;}
         .meta-item { display: flex; align-items: center; gap: 4px; }
-
         .badge-new { display: inline-flex; background: #e74c3c; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; font-weight: bold; white-space: nowrap; flex-shrink: 0; animation: pop 0.5s ease-out; margin-left: 10px;}
         @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
-
         .card-actions { display: flex; gap: 0.8rem; }
         .btn-action { background: none; border: none; font-size: 1.1rem; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; padding: 0; }
         .btn-action:hover { opacity: 1; color: var(--accent-color);}
-        
         .card-text { margin: 0 0 1.5rem 0; line-height: 1.6; color: #4a5568; white-space: pre-wrap; word-break: break-word; font-size: 1rem;}
 
-        /* GALERIE */
         .card-gallery { position: relative; width: 100%; height: 250px; border-radius: 8px; overflow: hidden; background-color: #dfd5e8; cursor: pointer; transition: transform 0.2s ease; margin-top: 1rem;}
         .card-gallery:hover { transform: scale(0.99); }
         .card-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .card-gallery.has-more::after { content: "+" attr(data-more) " photos"; position: absolute; bottom: 12px; left: 12px; background: rgba(49, 33, 62, 0.8); color: white; font-size: 0.8rem; font-weight: bold; padding: 6px 14px; border-radius: 20px; backdrop-filter: blur(4px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
 
-        /* PC RESPONSIVE */
         @media screen and (min-width: 768px) {
             .timeline-item { width: 50%; display: flex; flex-direction: column; margin-bottom: 0; box-sizing: border-box;}
             .timeline-card { width: 100%; text-align: left; }
@@ -153,13 +131,11 @@
             .timeline-item:nth-child(even)::after { left: 0; transform: translate(-50%, -50%); }
         }
 
-        /* FAB & MODALES */
         .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-color); color: white; border: none; font-size: 2.3rem; font-weight: 300; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4); cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
         .fab:hover { transform: scale(1.1); }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(49, 33, 62, 0.8); z-index: 100; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .modal-box { position: relative; background: var(--card-bg); width: 95%; max-width: 500px; padding: 2.5rem 2rem 2rem 2rem; border-radius: 12px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         
-        /* 🆕 BOUTON FERMER MODALE */
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: var(--text-light); cursor: pointer; line-height: 1; transition: color 0.2s; }
         .close-modal:hover { color: var(--error-color); }
 
@@ -167,9 +143,6 @@
         .form-group { margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; }
         .form-group label { font-size: 0.85rem; color: var(--text-light); font-weight: bold; text-transform: uppercase;}
         
-        .form-group select { padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; font-family: inherit; font-size: 1rem; outline: none; background: #fff; color: var(--text-color); cursor: pointer;}
-        .form-group select:focus { border-color: var(--accent-color); }
-
         .form-group input, .form-group textarea { padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; font-family: inherit; font-size: 1rem; outline: none; background: #fff; color: var(--text-color); }
         .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-color); }
         .form-group textarea { resize: vertical; min-height: 120px; }
@@ -190,7 +163,6 @@
 
         @media screen and (max-width: 920px) { .nav-prev { left: 10px; } .nav-next { right: 10px; } .close-lightbox { right: 10px; } }
         
-        /* 🆕 BOUTONS BACKUP */
         .btn-outline { width: 100%; border: 1px solid var(--line-color); background: transparent; color: var(--text-color); padding: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 0.5rem; transition: background 0.2s;}
         .btn-outline:hover { background: var(--line-color); }
     </style>
@@ -211,13 +183,11 @@
     </div>
 
     <div id="app-screen" class="hidden">
-        
         <div class="header">
             <div class="header-left">
                 <h2 style="margin:0; color: var(--accent-color);">Notre Journal</h2>
                 <span id="stats-counter" class="stats-counter">...</span>
             </div>
-            
             <div class="header-actions">
                 <button id="btn-settings" class="btn-icon-top" title="Paramètres">⚙️</button>
                 <button id="btn-logout" class="btn-icon-top btn-logout" title="Se déconnecter">
@@ -235,9 +205,8 @@
             
             <div class="search-box" id="search-box">
                 <input type="text" id="search-input" placeholder="Rechercher un mot, un lieu..." oninput="renderMemories()">
-                
                 <div class="custom-select" id="custom-year-select">
-                    <div class="select-selected" id="custom-year-selected" onclick="toggleYearSelect()">Toutes les années ▾</div>
+                    <div class="select-selected" id="custom-year-selected" onclick="toggleCustomSelect('custom-year-items', 'custom-year-selected', event)">Toutes les années ▾</div>
                     <div class="select-items" id="custom-year-items">
                         <div class="select-item" onclick="selectYear('all', 'Toutes les années')">Toutes les années</div>
                     </div>
@@ -253,9 +222,7 @@
             </div>
         </div>
 
-        <div class="timeline" id="timeline-container">
-            <div class="spinner"></div>
-        </div>
+        <div class="timeline" id="timeline-container"><div class="spinner"></div></div>
         <div id="gallery-container" class="global-gallery hidden"></div>
         <div id="map-container" class="hidden"></div>
 
@@ -276,27 +243,17 @@
     <div id="modal-name" class="modal-overlay hidden">
         <div class="modal-box">
             <span class="close-modal" onclick="closeSettingsModal()">&times;</span>
-            
             <h2 class="modal-title">Paramètres</h2>
-            
             <form id="form-name">
-                <div class="form-group">
-                    <label>Ton prénom ou surnom</label>
-                    <input type="text" id="input-name" placeholder="Comment t'appelles-tu ?" required>
-                </div>
+                <div class="form-group"><label>Ton prénom ou surnom</label><input type="text" id="input-name" placeholder="Comment t'appelles-tu ?" required></div>
                 <button type="submit" class="btn-submit" style="width: 100%;">Mettre à jour mon profil</button>
             </form>
-
             <hr style="border:0; border-top: 1px solid var(--line-color); margin: 2rem 0;">
-            
             <h3 style="color: var(--text-color); font-size: 1rem; margin-bottom: 0.5rem;">Coffre-fort & Sauvegarde</h3>
             <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 0; margin-bottom: 1.5rem;">Télécharge une sauvegarde technique pour restaurer en cas de problème, ou exporte un beau PDF à lire.</p>
-            
             <button type="button" class="btn-outline" onclick="exportJSONBackup()">💾 Exporter le Backup (.json)</button>
-            
             <input type="file" id="input-restore-json" accept=".json" style="display:none;" onchange="importJSONBackup(event)">
             <button type="button" class="btn-outline" onclick="document.getElementById('input-restore-json').click()">🔄 Restaurer un Backup</button>
-            
             <button type="button" class="btn-outline" onclick="exportPDF()" style="margin-top: 1rem; border-color: var(--accent-color); color: var(--accent-color);">📄 Générer un PDF lisible</button>
         </div>
     </div>
@@ -306,15 +263,20 @@
             <span class="close-modal" onclick="closeAddModal()">&times;</span>
             <h2 class="modal-title">Nouveau souvenir</h2>
             <form id="form-add">
+                
                 <div class="form-group">
                     <label>Type de souvenir</label>
-                    <select id="input-category" required>
-                        <option value="☕ Quotidien">☕ Quotidien</option>
-                        <option value="✈️ Voyage">✈️ Voyage</option>
-                        <option value="💭 Pensée">💭 Pensée</option>
-                        <option value="🤣 Anecdote">🤣 Anecdote</option>
-                        <option value="🎉 Événement">🎉 Événement</option>
-                    </select>
+                    <input type="hidden" id="input-category-val" value="📍 Classique">
+                    <div class="custom-select">
+                        <div class="select-selected" id="custom-cat-add-selected" onclick="toggleCustomSelect('custom-cat-add-items', 'custom-cat-add-selected', event)">📍 Classique ▾</div>
+                        <div class="select-items" id="custom-cat-add-items">
+                            <div class="select-item" onclick="selectCat('input-category-val', '📍 Classique', 'custom-cat-add-selected', 'custom-cat-add-items')">📍 Classique</div>
+                            <div class="select-item" onclick="selectCat('input-category-val', '✈️ Voyage', 'custom-cat-add-selected', 'custom-cat-add-items')">✈️ Voyage</div>
+                            <div class="select-item" onclick="selectCat('input-category-val', '💭 Pensée', 'custom-cat-add-selected', 'custom-cat-add-items')">💭 Pensée</div>
+                            <div class="select-item" onclick="selectCat('input-category-val', '🤣 Anecdote', 'custom-cat-add-selected', 'custom-cat-add-items')">🤣 Anecdote</div>
+                            <div class="select-item" onclick="selectCat('input-category-val', '🎉 Événement', 'custom-cat-add-selected', 'custom-cat-add-items')">🎉 Événement</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group"><label>Date</label><input type="date" id="input-date" required></div>
@@ -339,13 +301,17 @@
                 
                 <div class="form-group">
                     <label>Type de souvenir</label>
-                    <select id="edit-category" required>
-                        <option value="📍 Classique">📍 Classique</option>
-                        <option value="✈️ Voyage">✈️ Voyage</option>
-                        <option value="💭 Pensée">💭 Pensée</option>
-                        <option value="🤣 Anecdote">🤣 Anecdote</option>
-                        <option value="🎉 Événement">🎉 Événement</option>
-                    </select>
+                    <input type="hidden" id="edit-category-val" value="📍 Classique">
+                    <div class="custom-select">
+                        <div class="select-selected" id="custom-cat-edit-selected" onclick="toggleCustomSelect('custom-cat-edit-items', 'custom-cat-edit-selected', event)">📍 Classique ▾</div>
+                        <div class="select-items" id="custom-cat-edit-items">
+                            <div class="select-item" onclick="selectCat('edit-category-val', '📍 Classique', 'custom-cat-edit-selected', 'custom-cat-edit-items')">📍 Classique</div>
+                            <div class="select-item" onclick="selectCat('edit-category-val', '✈️ Voyage', 'custom-cat-edit-selected', 'custom-cat-edit-items')">✈️ Voyage</div>
+                            <div class="select-item" onclick="selectCat('edit-category-val', '💭 Pensée', 'custom-cat-edit-selected', 'custom-cat-edit-items')">💭 Pensée</div>
+                            <div class="select-item" onclick="selectCat('edit-category-val', '🤣 Anecdote', 'custom-cat-edit-selected', 'custom-cat-edit-items')">🤣 Anecdote</div>
+                            <div class="select-item" onclick="selectCat('edit-category-val', '🎉 Événement', 'custom-cat-edit-selected', 'custom-cat-edit-items')">🎉 Événement</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group"><label>Date</label><input type="date" id="edit-date" required></div>
@@ -377,10 +343,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        // 🆕 IMPORT DE setDoc POUR LA RESTAURATION
         import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, deleteDoc, updateDoc, setDoc, onSnapshot, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
-        // 🔑 CREDENTIALS CENTRALISÉS
         const firebaseConfig = {
             apiKey: "AIzaSyDOH4_A1Ifa9eZ3EkSeCQu46BwbuSoNA2g",
             authDomain: "notre-journal-93ae5.firebaseapp.com",
@@ -436,7 +400,6 @@
             });
         };
 
-        // UTILITAIRES SÉCURITÉ ET FORMATAGE
         function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])); }
         function formatDate(dateString) { 
             if(!dateString) return ''; 
@@ -461,9 +424,19 @@
             return null;
         }
 
-        window.toggleYearSelect = () => {
-            document.getElementById('custom-year-items').classList.toggle('select-show');
-            document.getElementById('custom-year-selected').classList.toggle('active');
+        // 🆕 FONCTION UNIVERSELLE POUR TOUS LES CUSTOM DROPDOWNS
+        window.toggleCustomSelect = (itemsId, selectedId, event) => {
+            event.stopPropagation(); // Empêche le clic de fermer immédiatement
+            // Ferme les autres dropdowns ouverts
+            document.querySelectorAll('.select-items.select-show').forEach(el => {
+                if(el.id !== itemsId) el.classList.remove('select-show');
+            });
+            document.querySelectorAll('.select-selected.active').forEach(el => {
+                if(el.id !== selectedId) el.classList.remove('active');
+            });
+            
+            document.getElementById(itemsId).classList.toggle('select-show');
+            document.getElementById(selectedId).classList.toggle('active');
         };
 
         window.selectYear = (val, label) => {
@@ -474,12 +447,17 @@
             window.renderMemories();
         };
 
+        window.selectCat = (inputId, val, selectedId, itemsId) => {
+            document.getElementById(inputId).value = val;
+            document.getElementById(selectedId).innerHTML = val + ' ▾';
+            document.getElementById(itemsId).classList.remove('select-show');
+            document.getElementById(selectedId).classList.remove('active');
+        };
+
+        // Clic n'importe où ferme les dropdowns
         document.addEventListener('click', function(e) {
-            const selectContainer = document.getElementById('custom-year-select');
-            if (selectContainer && !selectContainer.contains(e.target)) {
-                document.getElementById('custom-year-items').classList.remove('select-show');
-                document.getElementById('custom-year-selected').classList.remove('active');
-            }
+            document.querySelectorAll('.select-items.select-show').forEach(el => el.classList.remove('select-show'));
+            document.querySelectorAll('.select-selected.active').forEach(el => el.classList.remove('active'));
         });
 
         function updateYearFilterDropdown(years) {
@@ -490,19 +468,16 @@
             });
         }
 
-        // BOUTON PARAMÈTRES
         document.getElementById('btn-settings').addEventListener('click', () => {
             document.getElementById('input-name').value = getSavedName();
             document.getElementById('modal-name').classList.remove('hidden');
         });
         
         window.closeSettingsModal = () => {
-            // Empêcher la fermeture si c'est la 1ère connexion et que le nom est vide
             if(!localStorage.getItem('mm_username')) return alert("Veuillez entrer un prénom pour commencer.");
             document.getElementById('modal-name').classList.add('hidden');
         };
 
-        // 🆕 FONCTION EXPORT JSON (BACKUP MACHINE)
         window.exportJSONBackup = () => {
             if(window.allMemories.length === 0) return alert("Le journal est vide.");
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.allMemories));
@@ -512,7 +487,6 @@
             dlAnchorElem.click();
         };
 
-        // 🆕 FONCTION IMPORT JSON (RESTAURATION MACHINE)
         window.importJSONBackup = (event) => {
             const file = event.target.files[0];
             if(!file) return;
@@ -527,8 +501,7 @@
                     
                     for(const item of importedData) {
                         const id = item.id;
-                        delete item.id; // On ne stocke pas l'ID à l'intérieur du document lui-même
-                        // setDoc remplace s'il existe déjà, ou crée s'il n'existe pas. Sécurité parfaite contre les doublons.
+                        delete item.id; 
                         await setDoc(doc(db, "memories", id), item);
                     }
                     
@@ -539,17 +512,14 @@
                 }
             };
             reader.readAsText(file);
-            event.target.value = ""; // Reset l'input
+            event.target.value = ""; 
         };
 
-        // 🆕 FONCTION EXPORT PDF LISIBLE (Impression native propre)
         window.exportPDF = () => {
             if(window.allMemories.length === 0) return alert("Le journal est vide.");
             
-            // On ouvre une nouvelle fenêtre invisible
             const printWindow = window.open('', '', 'width=800,height=600');
             
-            // On génère une belle mise en page façon Livre HTML
             let html = `
             <html><head><title>Notre Journal - Export</title>
             <style>
@@ -587,19 +557,16 @@
 
             html += `</body></html>`;
             
-            // On écrit le code et on demande au navigateur de l'imprimer (ce qui permet de "Sauvegarder en PDF")
             printWindow.document.write(html);
             printWindow.document.close();
             printWindow.focus();
             
-            // Laisse le temps aux images de charger un peu avant d'imprimer
             setTimeout(() => { 
                 printWindow.print(); 
                 printWindow.close(); 
             }, 1000);
         };
 
-        // CYCLE D'AUTHENTIFICATION
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -668,7 +635,7 @@
                 const location = document.getElementById('input-location').value;
                 const title = document.getElementById('input-title').value;
                 const story = document.getElementById('input-story').value;
-                const category = document.getElementById('input-category').value;
+                const category = document.getElementById('input-category-val').value;
                 const files = document.getElementById('input-photos').files;
 
                 const coords = await getCoordinates(location);
@@ -697,7 +664,7 @@
             try {
                 const id = document.getElementById('edit-id').value;
                 const location = document.getElementById('edit-location').value;
-                const category = document.getElementById('edit-category').value;
+                const category = document.getElementById('edit-category-val').value;
                 
                 const oldData = window.allMemories.find(m => m.id === id);
                 let coords = oldData.coords;
@@ -838,7 +805,6 @@
                     }
                 }
 
-                // 🛠️ STRUCTURE DE CARTE REPENÉE (Blocs en colonnes pour aérer)
                 container.insertAdjacentHTML('beforeend', `
                     <div class="timeline-item" id="item-${data.id}">
                         <div class="timeline-dot"></div>
@@ -970,7 +936,10 @@
             const dateInput = document.getElementById('input-date');
             dateInput.value = todayStr;
             dateInput.max = todayStr; 
-            document.getElementById('input-category').value = "📍 Classique";
+            
+            document.getElementById('input-category-val').value = "📍 Classique";
+            document.getElementById('custom-cat-add-selected').innerHTML = "📍 Classique ▾";
+            
             document.getElementById('modal-add').classList.remove('hidden'); 
         };
         window.closeAddModal = () => document.getElementById('modal-add').classList.add('hidden');
@@ -983,7 +952,10 @@
             dateEditInput.value = data.date;
             dateEditInput.max = new Date().toISOString().split('T')[0]; 
             
-            document.getElementById('edit-category').value = data.category || "📍 Classique";
+            const cat = data.category || "📍 Classique";
+            document.getElementById('edit-category-val').value = cat;
+            document.getElementById('custom-cat-edit-selected').innerHTML = cat + " ▾";
+
             document.getElementById('edit-location').value = data.location || ""; 
             document.getElementById('edit-title').value = data.title;
             document.getElementById('edit-story').value = data.story || "";
