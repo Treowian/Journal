@@ -68,7 +68,6 @@
             .search-box input { flex: 1; width: 100%; box-sizing: border-box; }
         }
 
-        /* CUSTOM DROPDOWNS (Filtres et Modales) */
         .custom-select { position: relative; width: 100%; box-sizing: border-box; user-select: none; }
         .select-selected { padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); }
         .select-selected.active { border-color: var(--accent-color); }
@@ -266,11 +265,11 @@
                 
                 <div class="form-group">
                     <label>Type de souvenir</label>
-                    <input type="hidden" id="input-category-val" value="📍 Classique">
+                    <input type="hidden" id="input-category-val" value="☕ Quotidien">
                     <div class="custom-select">
-                        <div class="select-selected" id="custom-cat-add-selected" onclick="toggleCustomSelect('custom-cat-add-items', 'custom-cat-add-selected', event)">📍 Classique ▾</div>
+                        <div class="select-selected" id="custom-cat-add-selected" onclick="toggleCustomSelect('custom-cat-add-items', 'custom-cat-add-selected', event)">☕ Quotidien ▾</div>
                         <div class="select-items" id="custom-cat-add-items">
-                            <div class="select-item" onclick="selectCat('input-category-val', '📍 Classique', 'custom-cat-add-selected', 'custom-cat-add-items')">📍 Classique</div>
+                            <div class="select-item" onclick="selectCat('input-category-val', '☕ Quotidien', 'custom-cat-add-selected', 'custom-cat-add-items')">☕ Quotidien</div>
                             <div class="select-item" onclick="selectCat('input-category-val', '✈️ Voyage', 'custom-cat-add-selected', 'custom-cat-add-items')">✈️ Voyage</div>
                             <div class="select-item" onclick="selectCat('input-category-val', '💭 Pensée', 'custom-cat-add-selected', 'custom-cat-add-items')">💭 Pensée</div>
                             <div class="select-item" onclick="selectCat('input-category-val', '🤣 Anecdote', 'custom-cat-add-selected', 'custom-cat-add-items')">🤣 Anecdote</div>
@@ -301,11 +300,11 @@
                 
                 <div class="form-group">
                     <label>Type de souvenir</label>
-                    <input type="hidden" id="edit-category-val" value="📍 Classique">
+                    <input type="hidden" id="edit-category-val" value="☕ Quotidien">
                     <div class="custom-select">
-                        <div class="select-selected" id="custom-cat-edit-selected" onclick="toggleCustomSelect('custom-cat-edit-items', 'custom-cat-edit-selected', event)">📍 Classique ▾</div>
+                        <div class="select-selected" id="custom-cat-edit-selected" onclick="toggleCustomSelect('custom-cat-edit-items', 'custom-cat-edit-selected', event)">☕ Quotidien ▾</div>
                         <div class="select-items" id="custom-cat-edit-items">
-                            <div class="select-item" onclick="selectCat('edit-category-val', '📍 Classique', 'custom-cat-edit-selected', 'custom-cat-edit-items')">📍 Classique</div>
+                            <div class="select-item" onclick="selectCat('edit-category-val', '☕ Quotidien', 'custom-cat-edit-selected', 'custom-cat-edit-items')">☕ Quotidien</div>
                             <div class="select-item" onclick="selectCat('edit-category-val', '✈️ Voyage', 'custom-cat-edit-selected', 'custom-cat-edit-items')">✈️ Voyage</div>
                             <div class="select-item" onclick="selectCat('edit-category-val', '💭 Pensée', 'custom-cat-edit-selected', 'custom-cat-edit-items')">💭 Pensée</div>
                             <div class="select-item" onclick="selectCat('edit-category-val', '🤣 Anecdote', 'custom-cat-edit-selected', 'custom-cat-edit-items')">🤣 Anecdote</div>
@@ -424,10 +423,8 @@
             return null;
         }
 
-        // 🆕 FONCTION UNIVERSELLE POUR TOUS LES CUSTOM DROPDOWNS
         window.toggleCustomSelect = (itemsId, selectedId, event) => {
-            event.stopPropagation(); // Empêche le clic de fermer immédiatement
-            // Ferme les autres dropdowns ouverts
+            event.stopPropagation();
             document.querySelectorAll('.select-items.select-show').forEach(el => {
                 if(el.id !== itemsId) el.classList.remove('select-show');
             });
@@ -454,7 +451,6 @@
             document.getElementById(selectedId).classList.remove('active');
         };
 
-        // Clic n'importe où ferme les dropdowns
         document.addEventListener('click', function(e) {
             document.querySelectorAll('.select-items.select-show').forEach(el => el.classList.remove('select-show'));
             document.querySelectorAll('.select-selected.active').forEach(el => el.classList.remove('active'));
@@ -537,7 +533,7 @@
             <h1>Notre Journal</h1>`;
 
             window.allMemories.forEach(m => {
-                const cat = m.category || "📍 Classique";
+                const cat = m.category || "☕ Quotidien";
                 const loc = m.location ? ` • ${escapeHTML(m.location)}` : "";
                 
                 html += `<div class="entry">
@@ -624,7 +620,6 @@
             return Promise.all(uploadPromises); 
         }
 
-        // AJOUTER UN SOUVENIR
         document.getElementById('form-add').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.querySelector('#form-add .btn-submit');
@@ -655,7 +650,6 @@
             }
         });
 
-        // MODIFIER UN SOUVENIR
         document.getElementById('form-edit').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.querySelector('#form-edit .btn-submit');
@@ -690,7 +684,6 @@
             }
         });
 
-        // LIVE ENGINE
         window.unsubscribeSnapshot = null;
         function loadMemoriesLive() {
             const q = query(collection(db, "memories"), orderBy("date", "desc"));
@@ -761,7 +754,6 @@
             }
         }
 
-        // RENDRE LE CONTENU
         window.renderMemories = () => {
             const container = document.getElementById('timeline-container');
             container.innerHTML = ''; 
@@ -786,7 +778,10 @@
                 const safeStory = escapeHTML(data.story);
                 const displayDate = formatDate(data.date);
                 const safeAuthor = escapeHTML(data.author);
-                const safeCategory = escapeHTML(data.category) || '📍 Classique';
+                
+                // 🛠️ LA CORRECTION EST LÀ : "☕ Quotidien" au lieu de "📍 Classique"
+                const safeCategory = escapeHTML(data.category) || '☕ Quotidien';
+                
                 const authorDisplay = safeAuthor ? `<span class="card-author">${safeAuthor}</span>` : '';
                 
                 const isNew = data.timestamp && data.timestamp.toMillis() > sessionLastSeen && data.author !== getSavedName();
@@ -937,8 +932,8 @@
             dateInput.value = todayStr;
             dateInput.max = todayStr; 
             
-            document.getElementById('input-category-val').value = "📍 Classique";
-            document.getElementById('custom-cat-add-selected').innerHTML = "📍 Classique ▾";
+            document.getElementById('input-category-val').value = "☕ Quotidien";
+            document.getElementById('custom-cat-add-selected').innerHTML = "☕ Quotidien ▾";
             
             document.getElementById('modal-add').classList.remove('hidden'); 
         };
@@ -952,7 +947,7 @@
             dateEditInput.value = data.date;
             dateEditInput.max = new Date().toISOString().split('T')[0]; 
             
-            const cat = data.category || "📍 Classique";
+            const cat = data.category || "☕ Quotidien";
             document.getElementById('edit-category-val').value = cat;
             document.getElementById('custom-cat-edit-selected').innerHTML = cat + " ▾";
 
