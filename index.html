@@ -55,28 +55,44 @@
         .btn-icon-top:hover { background: rgba(0,0,0,0.05); color: var(--accent-color); }
         .btn-logout:hover { color: var(--error-color); }
 
-        .top-controls { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+        .top-controls { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
         .view-tabs { display: flex; background: var(--line-color); border-radius: 20px; padding: 4px; }
         .view-tab { flex: 1; text-align: center; padding: 0.6rem; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 0.9rem; color: var(--text-light); transition: all 0.2s; }
         .view-tab.active { background: var(--card-bg); color: var(--accent-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .search-box { display: flex; gap: 0.5rem; width: 100%; position: relative; }
-        .search-box input { flex: 2; padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; outline: none; font-size: 0.9rem;}
-        .search-box input:focus { border-color: var(--accent-color); }
-
-        @media screen and (max-width: 600px) {
-            .search-box { flex-direction: column; gap: 0.8rem; }
-            .search-box input { flex: 1; width: 100%; box-sizing: border-box; }
+        
+        /* ==========================================================================
+           🛠️ REFONTE DE LA BARRE DE FILTRES
+           ========================================================================== */
+        .filters-container { display: flex; flex-wrap: wrap; gap: 0.5rem; width: 100%; }
+        
+        .filters-container input, .select-selected, .btn-sort {
+            font-family: inherit; font-size: 0.9rem; box-sizing: border-box; height: 42px; 
+            border: 1px solid var(--line-color); border-radius: 8px; outline: none; background: white;
         }
-
-        .custom-select { position: relative; width: 100%; box-sizing: border-box; user-select: none; }
-        .select-selected { padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); }
+        
+        .filters-container input { flex: 1 1 250px; padding: 0 1rem; color: var(--text-color); }
+        .filters-container input:focus { border-color: var(--accent-color); }
+        
+        .custom-select { position: relative; flex: 0 1 180px; user-select: none; }
+        .select-selected { padding: 0 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .select-selected.active { border-color: var(--accent-color); }
-        .select-items { position: absolute; background-color: white; top: 100%; left: 0; right: 0; z-index: 999; border: 1px solid var(--line-color); border-radius: 8px; margin-top: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; display: none; }
+        
+        .select-items { position: absolute; background-color: white; top: 100%; left: 0; right: 0; z-index: 999; border: 1px solid var(--line-color); border-radius: 8px; margin-top: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-height: 250px; overflow-y: auto; display: none; }
         .select-items.select-show { display: block; }
-        .select-item { padding: 0.8rem; cursor: pointer; font-size: 0.9rem; border-bottom: 1px solid var(--line-color); color: var(--text-color); }
+        .select-item { padding: 0.8rem 1rem; cursor: pointer; font-size: 0.9rem; border-bottom: 1px solid var(--line-color); color: var(--text-color); }
         .select-item:last-child { border-bottom: none; }
         .select-item:hover { background-color: var(--bg-color); color: var(--accent-color); font-weight: bold; }
 
+        .btn-sort { flex: 0 1 auto; padding: 0 1rem; cursor: pointer; font-weight: bold; color: var(--text-color); transition: background 0.2s; white-space: nowrap;}
+        .btn-sort:hover { background: var(--bg-color); }
+
+        @media screen and (max-width: 768px) {
+            .filters-container input { flex: 1 1 100%; }
+            .custom-select { flex: 1 1 48%; }
+            .btn-sort { flex: 1 1 100%; }
+        }
+
+        /* VUES & CARTES */
         .ephemeride-banner { background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 2rem; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2); display: flex; align-items: center; gap: 1rem; box-sizing: border-box; cursor: pointer;}
         .ephemeride-icon { font-size: 2rem; }
         .ephemeride-content h3 { margin: 0 0 0.2rem 0; font-size: 1rem; opacity: 0.9;}
@@ -130,9 +146,10 @@
             .timeline-item:nth-child(even)::after { left: 0; transform: translate(-50%, -50%); }
         }
 
+        /* FAB & MODALES */
         .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-color); color: white; border: none; font-size: 2.3rem; font-weight: 300; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4); cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
         .fab:hover { transform: scale(1.1); }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(49, 33, 62, 0.8); z-index: 100; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(49, 33, 62, 0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .modal-box { position: relative; background: var(--card-bg); width: 95%; max-width: 500px; padding: 2.5rem 2rem 2rem 2rem; border-radius: 12px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: var(--text-light); cursor: pointer; line-height: 1; transition: color 0.2s; }
@@ -157,13 +174,16 @@
         .nav-next { right: -60px; }
         .close-lightbox { position: absolute; top: -40px; right: 0; color: white; font-size: 2.5rem; cursor: pointer; line-height: 1; }
 
-        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--text-color); color: white; padding: 1rem 2rem; border-radius: 30px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; display: flex; align-items: center; gap: 10px;}
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--text-color); color: white; padding: 1rem 2rem; border-radius: 30px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2000; display: flex; align-items: center; gap: 10px;}
         #toast.show { bottom: 30px; }
 
         @media screen and (max-width: 920px) { .nav-prev { left: 10px; } .nav-next { right: 10px; } .close-lightbox { right: 10px; } }
         
         .btn-outline { width: 100%; border: 1px solid var(--line-color); background: transparent; color: var(--text-color); padding: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 0.5rem; transition: background 0.2s;}
         .btn-outline:hover { background: var(--line-color); }
+        
+        /* Sentinel d'Intersection pour l'Infinite Scroll */
+        #scroll-sentinel { width: 100%; height: 20px; }
     </style>
 </head>
 <body>
@@ -203,14 +223,29 @@
                 <div class="view-tab" id="tab-map" onclick="switchView('map')">🗺️ Carte</div>
             </div>
             
-            <div class="search-box" id="search-box">
-                <input type="text" id="search-input" placeholder="Rechercher un mot, un lieu..." oninput="renderMemories()">
+            <div class="filters-container" id="search-box">
+                <input type="text" id="search-input" placeholder="Rechercher un mot, un lieu..." oninput="triggerSearch()">
+                
+                <div class="custom-select" id="custom-cat-filter">
+                    <div class="select-selected" id="custom-cat-filter-selected" onclick="toggleCustomSelect('custom-cat-filter-items', 'custom-cat-filter-selected', event)">Toutes catégories ▾</div>
+                    <div class="select-items" id="custom-cat-filter-items">
+                        <div class="select-item" onclick="selectCatFilter('all', 'Toutes catégories')">Toutes catégories</div>
+                        <div class="select-item" onclick="selectCatFilter('☕ Quotidien', '☕ Quotidien')">☕ Quotidien</div>
+                        <div class="select-item" onclick="selectCatFilter('✈️ Voyage', '✈️ Voyage')">✈️ Voyage</div>
+                        <div class="select-item" onclick="selectCatFilter('💭 Pensée', '💭 Pensée')">💭 Pensée</div>
+                        <div class="select-item" onclick="selectCatFilter('🤣 Anecdote', '🤣 Anecdote')">🤣 Anecdote</div>
+                        <div class="select-item" onclick="selectCatFilter('🎉 Événement', '🎉 Événement')">🎉 Événement</div>
+                    </div>
+                </div>
+
                 <div class="custom-select" id="custom-year-select">
                     <div class="select-selected" id="custom-year-selected" onclick="toggleCustomSelect('custom-year-items', 'custom-year-selected', event)">Toutes les années ▾</div>
                     <div class="select-items" id="custom-year-items">
                         <div class="select-item" onclick="selectYear('all', 'Toutes les années')">Toutes les années</div>
                     </div>
                 </div>
+
+                <button class="btn-sort" id="btn-sort-order" onclick="toggleSortOrder()" title="Changer le sens de lecture">⬇️ Plus récents</button>
             </div>
         </div>
 
@@ -222,14 +257,18 @@
             </div>
         </div>
 
-        <div class="timeline" id="timeline-container"><div class="spinner"></div></div>
+        <div class="timeline" id="timeline-container">
+            <div class="spinner"></div>
+        </div>
+        <div id="scroll-sentinel"></div>
+
         <div id="gallery-container" class="global-gallery hidden"></div>
         <div id="map-container" class="hidden"></div>
 
         <button class="fab" onclick="openAddModal()">+</button>
     </div>
 
-    <div id="modal-dialog" class="modal-overlay hidden" style="z-index: 2000;">
+    <div id="modal-dialog" class="modal-overlay hidden" style="z-index: 2500;">
         <div class="modal-box" style="max-width: 400px; text-align: center;">
             <h2 class="modal-title" id="dialog-title" style="margin-bottom: 1rem;">Titre</h2>
             <p id="dialog-message" style="color: var(--text-color); margin-bottom: 2rem; line-height: 1.5;">Message</p>
@@ -364,9 +403,14 @@
           localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
         });
 
+        // VUE & ETATS
         window.allMemories = []; 
         window.currentEditImages = []; 
         window.currentYearFilter = 'all';
+        window.currentCatFilter = 'all';
+        window.currentSortOrder = 'desc'; // 'desc' (récent d'abord), 'asc' (ancien d'abord)
+        window.renderLimit = 10; // 🚀 Infinite Scroll Limit
+        
         let currentView = 'list';
         let mapInstance = null;
         let mapMarkers = [];
@@ -424,6 +468,9 @@
             return null;
         }
 
+        // ==========================================
+        //  GESTION DES FILTRES ET MENUS DEROULANTS
+        // ==========================================
         window.toggleCustomSelect = (itemsId, selectedId, event) => {
             event.stopPropagation();
             document.querySelectorAll('.select-items.select-show').forEach(el => {
@@ -432,7 +479,6 @@
             document.querySelectorAll('.select-selected.active').forEach(el => {
                 if(el.id !== selectedId) el.classList.remove('active');
             });
-            
             document.getElementById(itemsId).classList.toggle('select-show');
             document.getElementById(selectedId).classList.toggle('active');
         };
@@ -442,6 +488,16 @@
             document.getElementById('custom-year-selected').innerHTML = label + ' ▾';
             document.getElementById('custom-year-items').classList.remove('select-show');
             document.getElementById('custom-year-selected').classList.remove('active');
+            window.renderLimit = 10; // Reset limite
+            window.renderMemories();
+        };
+        
+        window.selectCatFilter = (val, label) => {
+            window.currentCatFilter = val;
+            document.getElementById('custom-cat-filter-selected').innerHTML = label + ' ▾';
+            document.getElementById('custom-cat-filter-items').classList.remove('select-show');
+            document.getElementById('custom-cat-filter-selected').classList.remove('active');
+            window.renderLimit = 10; // Reset limite
             window.renderMemories();
         };
 
@@ -450,6 +506,24 @@
             document.getElementById(selectedId).innerHTML = val + ' ▾';
             document.getElementById(itemsId).classList.remove('select-show');
             document.getElementById(selectedId).classList.remove('active');
+        };
+
+        window.triggerSearch = () => {
+            window.renderLimit = 10;
+            window.renderMemories();
+        };
+
+        window.toggleSortOrder = () => {
+            const btn = document.getElementById('btn-sort-order');
+            if(window.currentSortOrder === 'desc') {
+                window.currentSortOrder = 'asc';
+                btn.innerHTML = "⬆️ Plus anciens";
+            } else {
+                window.currentSortOrder = 'desc';
+                btn.innerHTML = "⬇️ Plus récents";
+            }
+            window.renderLimit = 10;
+            window.renderMemories();
         };
 
         document.addEventListener('click', function(e) {
@@ -533,7 +607,15 @@
             </head><body>
             <h1>Notre Journal</h1>`;
 
-            window.allMemories.forEach(m => {
+            // Trier selon le sens choisi par l'utilisateur
+            let exportData = [...window.allMemories];
+            exportData.sort((a, b) => {
+                let dateA = new Date(a.date).getTime();
+                let dateB = new Date(b.date).getTime();
+                return window.currentSortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+            });
+
+            exportData.forEach(m => {
                 const cat = m.category || "☕ Quotidien";
                 const loc = m.location ? ` • ${escapeHTML(m.location)}` : "";
                 
@@ -596,7 +678,6 @@
             catch (error) { document.getElementById('login-error').classList.remove('hidden'); btn.disabled = false; btn.textContent = "Entrer"; }
         });
 
-        // 🆕 GESTION DU MOT DE PASSE OUBLIÉ
         document.getElementById('btn-reset-pwd').addEventListener('click', async () => {
             const emailVal = document.getElementById('email').value;
             if(!emailVal) {
@@ -770,17 +851,30 @@
             }
         }
 
+        // ==========================================
+        //  RENDER PRINCIPAL AVEC INFINITE SCROLL 🚀
+        // ==========================================
         window.renderMemories = () => {
             const container = document.getElementById('timeline-container');
             container.innerHTML = ''; 
 
             const searchQuery = document.getElementById('search-input').value.toLowerCase();
             const yearQuery = window.currentYearFilter;
+            const catQuery = window.currentCatFilter;
 
-            const filteredMemories = window.allMemories.filter(m => {
+            // 1. Filtrer
+            let filteredMemories = window.allMemories.filter(m => {
                 const matchSearch = (m.title||"").toLowerCase().includes(searchQuery) || (m.location||"").toLowerCase().includes(searchQuery) || (m.story||"").toLowerCase().includes(searchQuery);
                 const matchYear = yearQuery === 'all' || (m.date && m.date.startsWith(yearQuery));
-                return matchSearch && matchYear;
+                const matchCat = catQuery === 'all' || (m.category === catQuery) || (!m.category && catQuery === '☕ Quotidien');
+                return matchSearch && matchYear && matchCat;
+            });
+
+            // 2. Trier
+            filteredMemories.sort((a, b) => {
+                let dateA = new Date(a.date).getTime();
+                let dateB = new Date(b.date).getTime();
+                return window.currentSortOrder === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
             if (filteredMemories.length === 0) {
@@ -788,18 +882,18 @@
                 return;
             }
 
-            filteredMemories.forEach(data => {
+            // 3. LAZY LOADING : Ne prendre que les N premiers (renderLimit)
+            const memoriesToRender = filteredMemories.slice(0, window.renderLimit);
+
+            memoriesToRender.forEach(data => {
                 const safeLocation = escapeHTML(data.location);
                 const safeTitle = escapeHTML(data.title);
                 const safeStory = escapeHTML(data.story);
                 const displayDate = formatDate(data.date);
                 const safeAuthor = escapeHTML(data.author);
-                
-                // 🛠️ LA CORRECTION EST LÀ : "☕ Quotidien" au lieu de "📍 Classique"
                 const safeCategory = escapeHTML(data.category) || '☕ Quotidien';
                 
                 const authorDisplay = safeAuthor ? `<span class="card-author">${safeAuthor}</span>` : '';
-                
                 const isNew = data.timestamp && data.timestamp.toMillis() > sessionLastSeen && data.author !== getSavedName();
                 const badgeNew = isNew ? `<span class="badge-new">NOUVEAU ✨</span>` : '';
 
@@ -820,7 +914,6 @@
                     <div class="timeline-item" id="item-${data.id}">
                         <div class="timeline-dot"></div>
                         <div class="timeline-card" style="${isNew ? 'border-color: var(--accent-color);' : ''}">
-                            
                             <div class="card-header-top">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <span class="card-badge-category">${safeCategory}</span>
@@ -832,22 +925,38 @@
                                     <button class="btn-action" onclick="deleteMemory('${data.id}')" title="Supprimer">🗑️</button>
                                 </div>
                             </div>
-                            
                             <h3 class="card-title">${safeTitle}</h3>
-                            
                             <div class="card-meta-line">
                                 <div class="meta-item">📅 ${displayDate}</div>
                                 ${safeLocation ? `<div class="meta-item">📍 ${safeLocation}</div>` : ''}
                             </div>
-                            
                             <p class="card-text">${safeStory}</p>
                             ${galleryHTML}
                         </div>
                     </div>
                 `);
             });
+            
+            // Stocke la longueur filtrée pour l'Observer
+            window.filteredLength = filteredMemories.length; 
         };
 
+        // 🚀 L'INTERSECTION OBSERVER POUR LE SCROLL INFINI
+        const scrollObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && currentView === 'list') {
+                if(window.renderLimit < window.filteredLength) {
+                    window.renderLimit += 10;
+                    window.renderMemories(); // Re-rend avec 10 items de plus
+                }
+            }
+        }, { rootMargin: '200px' }); // Déclenche 200px avant d'atteindre le bas
+        
+        // On observe le bas de page dès que le DOM est prêt
+        document.addEventListener("DOMContentLoaded", () => {
+            scrollObserver.observe(document.getElementById('scroll-sentinel'));
+        });
+
+        // AUTRES VUES
         window.renderGallery = () => {
             const container = document.getElementById('gallery-container');
             container.innerHTML = '';
@@ -917,6 +1026,7 @@
                 document.getElementById('timeline-container').classList.remove('hidden');
                 document.getElementById('search-box').classList.remove('hidden');
                 checkOnThisDay(); 
+                window.renderLimit = 10; // Reset limite en changeant d'onglet
                 renderMemories();
             } else if (view === 'gallery') {
                 document.getElementById('gallery-container').classList.remove('hidden');
