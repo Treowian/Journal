@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notre Histoire</title>
+    <title>Kairos</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#8e44ad">
@@ -191,7 +191,7 @@
     <div id="toast">🔔 <span id="toast-msg">Nouveau souvenir ajouté !</span></div>
 
     <div id="login-screen" class="login-container">
-        <h1 class="login-title">Notre Histoire</h1>
+        <h1 class="login-title">Kairos</h1>
         <p class="login-subtitle">Connexion à votre espace privé</p>
         <form id="login-form" class="login-form">
             <input type="email" id="email" placeholder="Adresse e-mail" required autocomplete="email">
@@ -205,7 +205,7 @@
     <div id="app-screen" class="hidden">
         <div class="header">
             <div class="header-left">
-                <h2 style="margin:0; color: var(--accent-color);">Notre Journal</h2>
+                <h2 style="margin:0; color: var(--accent-color);">Kairos</h2>
                 <span id="stats-counter" class="stats-counter">...</span>
             </div>
             <div class="header-actions">
@@ -554,7 +554,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.allMemories));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `Notre_Journal_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            dlAnchorElem.setAttribute("download", `Kairos_Backup_${new Date().toISOString().split('T')[0]}.json`);
             dlAnchorElem.click();
         };
 
@@ -592,7 +592,7 @@
             const printWindow = window.open('', '', 'width=800,height=600');
             
             let html = `
-            <html><head><title>Notre Journal - Export</title>
+            <html><head><title>Kairos - Export</title>
             <style>
                 body { font-family: system-ui, sans-serif; padding: 40px; line-height: 1.6; color: #333; max-width: 800px; margin: auto;}
                 h1 { text-align: center; color: #8e44ad; font-size: 3em; margin-bottom: 50px; border-bottom: 2px solid #dfd5e8; padding-bottom: 20px;}
@@ -605,7 +605,7 @@
                 .gallery img { height: 200px; border-radius: 8px; object-fit: cover; }
             </style>
             </head><body>
-            <h1>Notre Journal</h1>`;
+            <h1>Kairos</h1>`;
 
             // Trier selon le sens choisi par l'utilisateur
             let exportData = [...window.allMemories];

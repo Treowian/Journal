@@ -1,6 +1,6 @@
 {
-  "name": "Notre Histoire",
-  "short_name": "Journal",
+  "name": "Kairos",
+  "short_name": "Kairos",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#faf8fc",
