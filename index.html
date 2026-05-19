@@ -103,7 +103,9 @@
         .gallery-overlay strong { font-size: 0.9rem; line-height: 1.2; }
         @media screen and (max-width: 600px) { .global-gallery { grid-template-columns: repeat(2, 1fr); } .gallery-overlay { opacity: 1; background: linear-gradient(transparent, rgba(49, 33, 62, 0.7));} }
 
-        /* FRISE CHRONOLOGIQUE RESPONSIVE */
+        /* ==========================================================================
+           🛠️ REFONTE UI : FRISE CHRONOLOGIQUE ET CARTES (Aérées et lisibles)
+           ========================================================================== */
         .timeline { position: relative; width: 100%; margin: 0 auto; padding: 0 0 2rem 0; box-sizing: border-box;}
         .timeline::after { content: ''; position: absolute; width: 2px; background-color: var(--line-color); top: 0; bottom: 0; left: 50%; transform: translateX(-50%); }
         .timeline-item { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 3rem; z-index: 2; box-sizing: border-box;}
@@ -111,23 +113,29 @@
         
         .timeline-card { width: 90%; padding: 1.5rem; background-color: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 20px rgba(142, 68, 173, 0.08); box-sizing: border-box; border: 2px solid transparent; transition: border-color 0.3s; overflow: hidden; }
         
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; gap: 10px; }
-        .card-meta-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; flex: 1; min-width: 0; }
-        .card-meta { font-size: 0.8rem; color: var(--accent-color); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin: 0;}
-        .card-author { font-size: 0.75rem; color: var(--text-light); background: rgba(0,0,0,0.04); padding: 3px 8px; border-radius: 12px; white-space: nowrap; }
+        /* HEADER EN BLOCS DISTINCTS */
+        .card-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+        
+        .card-badge-category { background: rgba(142, 68, 173, 0.1); color: var(--accent-color); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px; }
+        .card-author { font-size: 0.8rem; color: var(--text-light); }
 
-        .badge-new { display: inline-flex; background: #e74c3c; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; font-weight: bold; white-space: nowrap; flex-shrink: 0; animation: pop 0.5s ease-out; }
+        .card-title { margin: 0 0 0.5rem 0; font-size: 1.4rem; word-break: break-word; color: var(--text-color); }
+        
+        /* Ligne Date / Lieu épurée */
+        .card-meta-line { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.5rem; font-weight: 500;}
+        .meta-item { display: flex; align-items: center; gap: 4px; }
+
+        .badge-new { display: inline-flex; background: #e74c3c; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; font-weight: bold; white-space: nowrap; flex-shrink: 0; animation: pop 0.5s ease-out; margin-left: 10px;}
         @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        .card-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
-        .btn-action { background: none; border: none; font-size: 1.1rem; cursor: pointer; opacity: 0.5; transition: opacity 0.2s; padding: 0; }
-        .btn-action:hover { opacity: 1; }
+        .card-actions { display: flex; gap: 0.8rem; }
+        .btn-action { background: none; border: none; font-size: 1.1rem; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; padding: 0; }
+        .btn-action:hover { opacity: 1; color: var(--accent-color);}
         
-        .card-title { margin: 0 0 1rem 0; font-size: 1.3rem; word-break: break-word; }
-        .card-text { margin: 0 0 1.5rem 0; line-height: 1.6; color: #4a5568; white-space: pre-wrap; word-break: break-word; }
+        .card-text { margin: 0 0 1.5rem 0; line-height: 1.6; color: #4a5568; white-space: pre-wrap; word-break: break-word; font-size: 1rem;}
 
         /* GALERIE */
-        .card-gallery { position: relative; width: 100%; height: 250px; border-radius: 8px; overflow: hidden; background-color: #dfd5e8; cursor: pointer; transition: transform 0.2s ease; }
+        .card-gallery { position: relative; width: 100%; height: 250px; border-radius: 8px; overflow: hidden; background-color: #dfd5e8; cursor: pointer; transition: transform 0.2s ease; margin-top: 1rem;}
         .card-gallery:hover { transform: scale(0.99); }
         .card-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .card-gallery.has-more::after { content: "+" attr(data-more) " photos"; position: absolute; bottom: 12px; left: 12px; background: rgba(49, 33, 62, 0.8); color: white; font-size: 0.8rem; font-weight: bold; padding: 6px 14px; border-radius: 20px; backdrop-filter: blur(4px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
@@ -148,12 +156,16 @@
         .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-color); color: white; border: none; font-size: 2.3rem; font-weight: 300; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4); cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
         .fab:hover { transform: scale(1.1); }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(49, 33, 62, 0.8); z-index: 100; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-box { background: var(--card-bg); width: 95%; max-width: 500px; padding: 2rem; border-radius: 12px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-title { margin-top: 0; color: var(--accent-color); }
+        .modal-box { position: relative; background: var(--card-bg); width: 95%; max-width: 500px; padding: 2.5rem 2rem 2rem 2rem; border-radius: 12px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        /* 🆕 BOUTON FERMER MODALE */
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: var(--text-light); cursor: pointer; line-height: 1; transition: color 0.2s; }
+        .close-modal:hover { color: var(--error-color); }
+
+        .modal-title { margin-top: 0; color: var(--accent-color); margin-bottom: 1.5rem;}
         .form-group { margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; }
         .form-group label { font-size: 0.85rem; color: var(--text-light); font-weight: bold; text-transform: uppercase;}
         
-        /* Selects (Catégories) */
         .form-group select { padding: 0.8rem; border: 1px solid var(--line-color); border-radius: 8px; font-family: inherit; font-size: 1rem; outline: none; background: #fff; color: var(--text-color); cursor: pointer;}
         .form-group select:focus { border-color: var(--accent-color); }
 
@@ -176,6 +188,10 @@
         #toast.show { bottom: 30px; }
 
         @media screen and (max-width: 920px) { .nav-prev { left: 10px; } .nav-next { right: 10px; } .close-lightbox { right: 10px; } }
+        
+        /* 🆕 BOUTONS BACKUP */
+        .btn-outline { width: 100%; border: 1px solid var(--line-color); background: transparent; color: var(--text-color); padding: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 0.5rem; transition: background 0.2s;}
+        .btn-outline:hover { background: var(--line-color); }
     </style>
 </head>
 <body>
@@ -258,6 +274,8 @@
 
     <div id="modal-name" class="modal-overlay hidden">
         <div class="modal-box">
+            <span class="close-modal" onclick="closeSettingsModal()">&times;</span>
+            
             <h2 class="modal-title">Paramètres</h2>
             
             <form id="form-name">
@@ -270,14 +288,21 @@
 
             <hr style="border:0; border-top: 1px solid var(--line-color); margin: 2rem 0;">
             
-            <h3 style="color: var(--text-color); font-size: 1rem; margin-bottom: 0.5rem;">Sauvegarde du journal</h3>
-            <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 0; margin-bottom: 1rem;">Télécharge une copie texte intégrale de tes souvenirs pour ne jamais rien perdre.</p>
-            <button type="button" class="btn-cancel" style="width: 100%; border: 1px solid var(--line-color); text-align: center; padding: 0.8rem; border-radius: 8px;" onclick="exportJournal()">📥 Télécharger la sauvegarde</button>
+            <h3 style="color: var(--text-color); font-size: 1rem; margin-bottom: 0.5rem;">Coffre-fort & Sauvegarde</h3>
+            <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 0; margin-bottom: 1.5rem;">Télécharge une sauvegarde technique pour restaurer en cas de problème, ou exporte un beau PDF à lire.</p>
+            
+            <button type="button" class="btn-outline" onclick="exportJSONBackup()">💾 Exporter le Backup (.json)</button>
+            
+            <input type="file" id="input-restore-json" accept=".json" style="display:none;" onchange="importJSONBackup(event)">
+            <button type="button" class="btn-outline" onclick="document.getElementById('input-restore-json').click()">🔄 Restaurer un Backup</button>
+            
+            <button type="button" class="btn-outline" onclick="exportPDF()" style="margin-top: 1rem; border-color: var(--accent-color); color: var(--accent-color);">📄 Générer un PDF lisible</button>
         </div>
     </div>
 
     <div id="modal-add" class="modal-overlay hidden">
         <div class="modal-box">
+            <span class="close-modal" onclick="closeAddModal()">&times;</span>
             <h2 class="modal-title">Nouveau souvenir</h2>
             <form id="form-add">
                 <div class="form-group">
@@ -287,7 +312,7 @@
                         <option value="✈️ Voyage">✈️ Voyage</option>
                         <option value="💭 Pensée">💭 Pensée</option>
                         <option value="🤣 Anecdote">🤣 Anecdote</option>
-                        <option value="🏆 Grande étape">🏆 Grande étape</option>
+                        <option value="🎉 Événement">🎉 Événement</option>
                     </select>
                 </div>
 
@@ -306,6 +331,7 @@
 
     <div id="modal-edit" class="modal-overlay hidden">
         <div class="modal-box">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
             <h2 class="modal-title">Modifier le souvenir</h2>
             <form id="form-edit">
                 <input type="hidden" id="edit-id">
@@ -317,7 +343,7 @@
                         <option value="✈️ Voyage">✈️ Voyage</option>
                         <option value="💭 Pensée">💭 Pensée</option>
                         <option value="🤣 Anecdote">🤣 Anecdote</option>
-                        <option value="🏆 Grande étape">🏆 Grande étape</option>
+                        <option value="🎉 Événement">🎉 Événement</option>
                     </select>
                 </div>
 
@@ -350,7 +376,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, deleteDoc, updateDoc, onSnapshot, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        // 🆕 IMPORT DE setDoc POUR LA RESTAURATION
+        import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, deleteDoc, updateDoc, setDoc, onSnapshot, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
         // 🔑 CREDENTIALS CENTRALISÉS
         const firebaseConfig = {
@@ -393,7 +420,7 @@
                 
                 if(isConfirm) {
                     btnCancel.style.display = 'block';
-                    btnConfirm.innerText = 'Supprimer';
+                    btnConfirm.innerText = 'Confirmer';
                     btnConfirm.style.backgroundColor = 'var(--error-color)';
                 } else {
                     btnCancel.style.display = 'none';
@@ -467,30 +494,108 @@
             document.getElementById('input-name').value = getSavedName();
             document.getElementById('modal-name').classList.remove('hidden');
         });
+        
+        window.closeSettingsModal = () => {
+            // Empêcher la fermeture si c'est la 1ère connexion et que le nom est vide
+            if(!localStorage.getItem('mm_username')) return alert("Veuillez entrer un prénom pour commencer.");
+            document.getElementById('modal-name').classList.add('hidden');
+        };
 
-        // 🆕 FONCTION D'EXPORT DU JOURNAL
-        window.exportJournal = () => {
+        // 🆕 FONCTION EXPORT JSON (BACKUP MACHINE)
+        window.exportJSONBackup = () => {
+            if(window.allMemories.length === 0) return alert("Le journal est vide.");
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.allMemories));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `Notre_Journal_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            dlAnchorElem.click();
+        };
+
+        // 🆕 FONCTION IMPORT JSON (RESTAURATION MACHINE)
+        window.importJSONBackup = (event) => {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    const confirmed = await customDialog("Restauration", `Vous êtes sur le point de restaurer ${importedData.length} souvenirs. Les doublons seront ignorés. Continuer ?`, true);
+                    if(!confirmed) return;
+                    
+                    showToast("Restauration en cours... ⏳");
+                    
+                    for(const item of importedData) {
+                        const id = item.id;
+                        delete item.id; // On ne stocke pas l'ID à l'intérieur du document lui-même
+                        // setDoc remplace s'il existe déjà, ou crée s'il n'existe pas. Sécurité parfaite contre les doublons.
+                        await setDoc(doc(db, "memories", id), item);
+                    }
+                    
+                    showToast("Restauration terminée avec succès !");
+                    closeSettingsModal();
+                } catch(err) { 
+                    await customDialog("Erreur", "Le fichier JSON est invalide ou corrompu."); 
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ""; // Reset l'input
+        };
+
+        // 🆕 FONCTION EXPORT PDF LISIBLE (Impression native propre)
+        window.exportPDF = () => {
             if(window.allMemories.length === 0) return alert("Le journal est vide.");
             
-            let content = "NOTRE JOURNAL - SAUVEGARDE INTÉGRALE\n=====================================\n\n";
+            // On ouvre une nouvelle fenêtre invisible
+            const printWindow = window.open('', '', 'width=800,height=600');
             
+            // On génère une belle mise en page façon Livre HTML
+            let html = `
+            <html><head><title>Notre Journal - Export</title>
+            <style>
+                body { font-family: system-ui, sans-serif; padding: 40px; line-height: 1.6; color: #333; max-width: 800px; margin: auto;}
+                h1 { text-align: center; color: #8e44ad; font-size: 3em; margin-bottom: 50px; border-bottom: 2px solid #dfd5e8; padding-bottom: 20px;}
+                .entry { margin-bottom: 60px; page-break-inside: avoid; }
+                .entry-header { margin-bottom: 15px; }
+                h2 { color: #31213e; margin: 0 0 5px 0; font-size: 1.8em; }
+                .meta { color: #847395; font-size: 1em; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
+                .story { white-space: pre-wrap; font-size: 1.1em; color: #4a5568;}
+                .gallery { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+                .gallery img { height: 200px; border-radius: 8px; object-fit: cover; }
+            </style>
+            </head><body>
+            <h1>Notre Journal</h1>`;
+
             window.allMemories.forEach(m => {
-                content += `[${m.date}] ${m.title} (Par ${m.author || "Inconnu"})\n`;
-                if(m.category) content += `Catégorie : ${m.category}\n`;
-                if(m.location) content += `Lieu : ${m.location}\n`;
-                if(m.story) content += `\n${m.story}\n`;
-                if(m.images && m.images.length > 0) {
-                    content += `\nLien(s) photo(s) :\n`;
-                    m.images.forEach(img => content += `- ${img}\n`);
+                const cat = m.category || "📍 Classique";
+                const loc = m.location ? ` • ${escapeHTML(m.location)}` : "";
+                
+                html += `<div class="entry">
+                    <div class="entry-header">
+                        <h2>${escapeHTML(m.title)}</h2>
+                        <div class="meta">${cat}${loc} • ${formatDate(m.date)}</div>
+                    </div>
+                    <div class="story">${escapeHTML(m.story)}</div>`;
+                
+                if (m.images && m.images.length > 0) {
+                    html += `<div class="gallery">`;
+                    m.images.forEach(img => html += `<img src="${img}">`);
+                    html += `</div>`;
                 }
-                content += `\n-------------------------------------\n\n`;
+                html += `</div>`;
             });
 
-            const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `Notre_Journal_Sauvegarde_${new Date().toISOString().split('T')[0]}.txt`;
-            link.click();
+            html += `</body></html>`;
+            
+            // On écrit le code et on demande au navigateur de l'imprimer (ce qui permet de "Sauvegarder en PDF")
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.focus();
+            
+            // Laisse le temps aux images de charger un peu avant d'imprimer
+            setTimeout(() => { 
+                printWindow.print(); 
+                printWindow.close(); 
+            }, 1000);
         };
 
         // CYCLE D'AUTHENTIFICATION
@@ -732,13 +837,15 @@
                     }
                 }
 
+                // 🛠️ STRUCTURE DE CARTE REPENÉE (Blocs en colonnes pour aérer)
                 container.insertAdjacentHTML('beforeend', `
                     <div class="timeline-item" id="item-${data.id}">
                         <div class="timeline-dot"></div>
                         <div class="timeline-card" style="${isNew ? 'border-color: var(--accent-color);' : ''}">
-                            <div class="card-header">
-                                <div class="card-meta-group">
-                                    <span class="card-meta">${safeCategory} &bull; ${safeLocation ? `${safeLocation} &bull; ` : ''}${displayDate}</span>
+                            
+                            <div class="card-header-top">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="card-badge-category">${safeCategory}</span>
                                     ${authorDisplay}
                                     ${badgeNew}
                                 </div>
@@ -747,7 +854,14 @@
                                     <button class="btn-action" onclick="deleteMemory('${data.id}')" title="Supprimer">🗑️</button>
                                 </div>
                             </div>
+                            
                             <h3 class="card-title">${safeTitle}</h3>
+                            
+                            <div class="card-meta-line">
+                                <div class="meta-item">📅 ${displayDate}</div>
+                                ${safeLocation ? `<div class="meta-item">📍 ${safeLocation}</div>` : ''}
+                            </div>
+                            
                             <p class="card-text">${safeStory}</p>
                             ${galleryHTML}
                         </div>
