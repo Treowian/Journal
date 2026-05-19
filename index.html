@@ -1114,6 +1114,21 @@
             else if (e.key === 'ArrowLeft') window.prevPhoto();
             else if (e.key === 'Escape') window.closeLightbox();
         });
+
+        // ==========================================
+        //  INSTALLATION DU SERVICE WORKER (MODE HORS-LIGNE)
+        // ==========================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker activé ! Portée :', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.error('❌ Échec du Service Worker :', error);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
