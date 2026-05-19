@@ -100,9 +100,15 @@
         /* 🆕 REFONTE DE LA GALERIE PAR ALBUMS */
         #gallery-container { width: 100%; padding-bottom: 3rem; }
         .album-section { margin-bottom: 2.5rem; width: 100%; background: var(--card-bg); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(142, 68, 173, 0.05); box-sizing: border-box;}
-        .album-title { font-size: 1.2rem; font-weight: bold; color: var(--text-color); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--line-color); padding-bottom: 0.5rem;}
-        .album-date { font-size: 0.85rem; color: var(--text-light); font-weight: normal; }
+        .album-title { font-size: 1.2rem; font-weight: bold; color: var(--text-color); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line-color); padding-bottom: 0.5rem; cursor: pointer; user-select: none; transition: opacity 0.2s;}
+        .album-title:hover { opacity: 0.7; }
+        .album-date { font-size: 0.85rem; color: var(--text-light); font-weight: normal; margin-left: 10px;}
+        .album-toggle { font-size: 0.9rem; color: var(--text-light); transition: transform 0.3s ease; }
         .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+        
+        /* Magie CSS : quand la classe "collapsed" est là, on cache la grille et on tourne la flèche */
+        .album-section.collapsed .album-grid { display: none; }
+        .album-section.collapsed .album-toggle { transform: rotate(-90deg); }
         .album-grid img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 6px; cursor: pointer; transition: transform 0.2s; }
         .album-grid img:hover { transform: scale(1.05); }
 
@@ -1008,8 +1014,11 @@
                     hasPhotos = true;
                     const imagesArrayString = JSON.stringify(m.images).replace(/"/g, '&quot;');
                     
-                    let html = `<div class="album-section">
-                        <div class="album-title">${escapeHTML(m.title)} <span class="album-date">${formatDate(m.date)}</span></div>
+                    let html = `<div class="album-section" id="album-${m.id}">
+                        <div class="album-title" onclick="toggleAlbum('${m.id}')">
+                            <div>${escapeHTML(m.title)} <span class="album-date">${formatDate(m.date)}</span></div>
+                            <span class="album-toggle">▼</span>
+                        </div>
                         <div class="album-grid">`;
                     
                     m.images.forEach((url, index) => {
@@ -1026,6 +1035,11 @@
             }
         };
 
+        window.toggleAlbum = (id) => {
+            const album = document.getElementById(`album-${id}`);
+            if (album) album.classList.toggle('collapsed');
+        };
+        
         window.renderMap = () => {
             if (!mapInstance) {
                 mapInstance = L.map('map-container').setView([46.2276, 2.2137], 5);
