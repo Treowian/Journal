@@ -1021,9 +1021,13 @@
                     hasPhotos = true;
                     const imagesArrayString = JSON.stringify(m.images).replace(/"/g, '&quot;');
                     
+                    // On récupère juste l'émoji (le premier caractère avant l'espace)
+                    const catEmoji = (m.category || "☕").split(' ')[0];
+                    
+                    // 🆕 Création de l'album avec Accordéon et Émoji
                     let html = `<div class="album-section" id="album-${m.id}">
                         <div class="album-title" onclick="toggleAlbum('${m.id}')">
-                            <div>${escapeHTML(m.title)} <span class="album-date">${formatDate(m.date)}</span></div>
+                            <div>${catEmoji} ${escapeHTML(m.title)} <span class="album-date">${formatDate(m.date)}</span></div>
                             <span class="album-toggle">▼</span>
                         </div>
                         <div class="album-grid">`;
