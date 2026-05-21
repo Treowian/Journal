@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kairos-v4';
+const CACHE_NAME = 'kairos-v5';
 
 // La liste des fichiers indispensables à sauvegarder sur le téléphone
 const ASSETS_TO_CACHE = [
